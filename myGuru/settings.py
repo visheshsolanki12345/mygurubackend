@@ -40,12 +40,22 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
-    'StudentManagement',
     'rest_framework',
     'rest_framework.authtoken',
-    # 'CareerManagement',
-    'AptitueTestManagement',
+    'StudentManagement.apps.StudentManagementConfig',
+    'AptitueTestManagement.apps.AptituetestmanagementConfig',
+    'CareerManagementSystem.apps.CareermanagementsystemConfig',
+    'Test_6To9.apps.Test6To9Config',
+    'Test_7th.apps.Test7ThConfig',
+    'Test_8th.apps.Test7ThConfig',
+    'Test_9th.apps.Test7ThConfig',
+    'Test_10.apps.Test10Config',
+    'Test_10th_interest.apps.Test10ThInterestConfig',
+    'Test_12th.apps.Test12ThConfig',
+    'videoCarrer',
 ]
+
+   
 
 
 MIDDLEWARE = [
@@ -81,8 +91,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            # os.path.join(BASE_DIR, 'React-app/build'),
-            # os.path.join(BASE_DIR, 'React-app/assets')
+            # os.path.join(BASE_DIR, 'frontend/build')
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -95,6 +104,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'myGuru.wsgi.application'
 
@@ -146,14 +156,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-# STATIC_URL = '/static/'
-
 # CORS_ORIGIN_ALLOW_ALL = True
 # CORS_ORIGIN_WHITELIST = (
 #   'http://localhost:3000',
 # )
 
 CORS_ALLOW_ALL_ORIGINS = True
+
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=30),
@@ -184,33 +193,34 @@ SIMPLE_JWT = {
 }
 
 
+
+STATIC_URL = '/static/'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'visheshsolanki12345@gmail.com'
+EMAIL_HOST_PASSWORD = 'wvvnshtnrqhmwiwt'
+
+STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+LOGIN_REDIRECT_URL = '/profile/'
+
+
 # STATIC_URL = '/static/'
-# STATIC_URL = '/assets/'
 # MEDIA_URL = '/images/'
 
 # STATICFILES_DIRS = [
 #     BASE_DIR / 'static',
-#     BASE_DIR / 'React-app/build/static',
-#     BASE_DIR / 'assets',
-#     BASE_DIR / 'React-app/build/assets'
-
+#      BASE_DIR / 'frontend/build/static'
 # ]
+
 # MEDIA_ROOT = 'static/images'
-
-
-STATIC_URL = '/static/'
-# STATIC_URL = '/assets/'
-
-
-
-# STATICFILES_DIRS = [
-#     BASE_DIR / 'static',
-#     BASE_DIR / 'React-app/build/static',
-#     BASE_DIR / 'assets',
-#     BASE_DIR / 'React-app/build/assets'
-# ]
-
-
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
