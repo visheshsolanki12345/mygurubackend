@@ -22,6 +22,7 @@ class Course(models.Model):
     industry = models.ForeignKey(CareerCategory, null=True, blank=True, on_delete=CASCADE, related_name='industryData')
     courseName = models.CharField(max_length=500, null=True, blank=True)
     bannerImage = models.ImageField(upload_to=Banner_directory_path_main,null=True, blank=True)
+    bannerImage2 = models.ImageField(upload_to=Banner_directory_path_main,null=True, blank=True)
 
     def __str__(self):
         return str(self.industry)
