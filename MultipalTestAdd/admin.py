@@ -1,16 +1,22 @@
 from django.contrib import admin
 from .models import (
-    NewClass, PaymentHistory, ShowGrade, Section, Interpretation,
+    NewClass, PaymentHistory, SelectAcademic, ShowGrade, Section, Interpretation,
     ImageOptionsTest, OneOptionsTest,
     OptionsTest, AddTest, TestBackupOneQuizeCorrect, TestCategory, Title, SelectNumber, ThreeOptionsTest, FiveOptionsTest,
     Reports, InterpretationGrade, Career, ResultTitle, TestBackupOneImageQuizeCorrect, TestBackupMultipalQuize,
     TestBackupFiveQuize, TestBackupThreeQuize
     )
 # Register your models here.
+from django.contrib.admin import AdminSite, sites
+
+
+@admin.register(SelectAcademic)
+class SelectAcademicModelAdmin(admin.ModelAdmin):
+    list_display = ['id', 'classOrCollage']
 
 @admin.register(NewClass)
 class NewClassModelAdmin(admin.ModelAdmin):
-    list_display = ['id','newClass']
+    list_display = ['id','newClass', 'classOrCollage']
 
 @admin.register(Career)
 class CareerModelAdmin(admin.ModelAdmin):
@@ -20,29 +26,6 @@ class CareerModelAdmin(admin.ModelAdmin):
 @admin.register(Section)
 class SectionModelAdmin(admin.ModelAdmin):
     list_display = ['id', 'section']
-
-@admin.register(InterpretationGrade)
-class InterpretationGradeModelAdmin(admin.ModelAdmin):
-    list_display = ['id', 'grade']
-
-@admin.register(ShowGrade)
-class ShowGradeModelAdmin(admin.ModelAdmin):
-    list_display = ['className', 'section', 'selectGrade', 'score', 'the_json']
-
-
-@admin.register(Interpretation)
-class InterpretationModelAdmin(admin.ModelAdmin):
-    list_display = ['className', 'section', 'title','grade', 'selectGrade', 'point', 'the_json', 'the_title']
-
-
-@admin.register(SelectNumber)
-class SelectNumberModelAdmin(admin.ModelAdmin):
-    list_display = ['className', 'a', 'b', 'c', 'd', 'e', 'rightAns']
-
-
-@admin.register(Title)
-class TitleModelAdmin(admin.ModelAdmin):
-    list_display = ['className', 'description', 'duration', 'price']
 
 
 @admin.register(ImageOptionsTest)
@@ -74,6 +57,31 @@ class TestCategoryModelAdmin(admin.ModelAdmin):
     list_display = ['id', 'selectTest']
 
 
+@admin.register(InterpretationGrade)
+class InterpretationGradeModelAdmin(admin.ModelAdmin):
+    list_display = ['id', 'grade']
+
+
+@admin.register(ShowGrade)
+class ShowGradeModelAdmin(admin.ModelAdmin):
+    list_display = ['className', 'section', 'selectGrade', 'score', 'the_json']
+
+
+@admin.register(Interpretation)
+class InterpretationModelAdmin(admin.ModelAdmin):
+    list_display = ['className', 'section', 'title','grade', 'selectGrade', 'point', 'the_json', 'the_title']
+
+
+@admin.register(SelectNumber)
+class SelectNumberModelAdmin(admin.ModelAdmin):
+    list_display = ['className', 'a', 'b', 'c', 'd', 'e', 'rightAns']
+
+
+@admin.register(Title)
+class TitleModelAdmin(admin.ModelAdmin):
+    list_display = ['className', 'description', 'duration', 'price']
+
+
 @admin.register(ResultTitle)
 class ResultTitleModelAdmin(admin.ModelAdmin):
     list_display = ['typeOfTest', 'className', 'mainHeading', 'title', 'discription', 'point', 'the_json']
@@ -92,28 +100,52 @@ class ReportsModelAdmin(admin.ModelAdmin):
 class PaymentHistoryModelAdmin(admin.ModelAdmin):
     list_display = ['user', 'typeOfTest', 'Class', 'ORDER_ID', 'TXN_AMOUNT', 'email', 'status', 'gateway', 'bankname', 'TXNID', 'TXNDATE', 'paymentCount', 'CURRENCY', 'PAYMENTMODE', 'MID', 'RESPCODE']
 
-# @admin.register(TestBackupOneQuizeCorrect)
-# class TestBackupOneQuizeCorrectModelAdmin(admin.ModelAdmin):
-#     list_display = ['user', 'typeOfTest', 'className', 'oneQuizeCorrect', 'testDiscription', 'userClickObj', 'createAt']
+@admin.register(TestBackupOneQuizeCorrect)
+class TestBackupOneQuizeCorrectModelAdmin(admin.ModelAdmin):
+    list_display = ['user', 'typeOfTest', 'className', 'oneQuizeCorrect', 'testDiscription', 'userClickObj', 'createAt', 'lastTime']
 
-# @admin.register(TestBackupOneImageQuizeCorrect)
-# class TestBackupOneImageQuizeCorrectModelAdmin(admin.ModelAdmin):
-#     list_display = ['user', 'typeOfTest', 'className', 'imageOneQuizeCorrect', 'testDiscription', 'userClickObj', 'createAt']
-
-
-# @admin.register(TestBackupMultipalQuize)
-# class TestBackupMultipalQuizeModelAdmin(admin.ModelAdmin):
-#     list_display = ['user', 'typeOfTest', 'className', 'multipalQuize', 'testDiscription', 'userClickObj', 'createAt']
+@admin.register(TestBackupOneImageQuizeCorrect)
+class TestBackupOneImageQuizeCorrectModelAdmin(admin.ModelAdmin):
+    list_display = ['user', 'typeOfTest', 'className', 'imageOneQuizeCorrect', 'testDiscription', 'userClickObj', 'createAt', 'lastTime']
 
 
-# @admin.register(TestBackupFiveQuize)
-# class TestBackupFiveQuizeModelAdmin(admin.ModelAdmin):
-#     list_display = ['user', 'typeOfTest', 'className', 'fiveQuize', 'testDiscription', 'userClickObj', 'createAt']
+@admin.register(TestBackupMultipalQuize)
+class TestBackupMultipalQuizeModelAdmin(admin.ModelAdmin):
+    list_display = ['user', 'typeOfTest', 'className', 'multipalQuize', 'testDiscription', 'userClickObj', 'createAt','lastTime']
 
 
-# @admin.register(TestBackupThreeQuize)
-# class TestBackupThreeQuizeModelAdmin(admin.ModelAdmin):
-#     list_display = ['user', 'typeOfTest', 'className', 'threeQuize', 'testDiscription', 'userClickObj', 'createAt']
+@admin.register(TestBackupFiveQuize)
+class TestBackupFiveQuizeModelAdmin(admin.ModelAdmin):
+    list_display = ['user', 'typeOfTest', 'className', 'fiveQuize', 'testDiscription', 'userClickObj', 'createAt', 'lastTime']
+
+
+@admin.register(TestBackupThreeQuize)
+class TestBackupThreeQuizeModelAdmin(admin.ModelAdmin):
+    list_display = ['user', 'typeOfTest', 'className', 'threeQuize', 'testDiscription', 'userClickObj', 'createAt', 'lastTime']
 
 
 
+
+
+
+def get_app_list(self, request):
+    """
+    Return a sorted list of all the installed apps that have been
+    registered in this site.
+    """
+    # Retrieve the original list
+    app_dict = self._build_app_dict(request)
+    app_list = sorted(app_dict.values(), key=lambda x: x['name'].lower())
+
+    # Sort the models customably within each app.
+    for app in app_list:
+        if app['app_label'] == 'auth':
+            ordering = {
+                'Users': 1,
+                'Groups': 2
+            }
+            app['models'].sort(key=lambda x: ordering[x['name']])
+
+    return app_list
+
+admin.AdminSite.get_app_list = get_app_list

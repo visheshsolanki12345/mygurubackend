@@ -14,6 +14,10 @@ urlpatterns = [
     path('test-payment-done/', views.paymentAndTest, name="test-payment-done"),
     path('buy-test/', views.buyTest, name="buy-test"),
     path('payment-decriment/', views.paymentDecriment, name="payment-decrimen"),
+    path('payment-router/', views.checkPaymentRouter, name="payment-router"),
+
+
+    path('self/', views.ResultGenerator, name="self"),
 
     # // payment URL
     path('handlepayment/', views.HandlePaytemRequest, name='HandleRequest'),

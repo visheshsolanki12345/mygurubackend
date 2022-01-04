@@ -1,17 +1,22 @@
 from rest_framework import serializers
 
 from .models import (
-    NewClass, ResultTitle, ShowGrade, Section, Interpretation, TestBackupFiveQuize, TestBackupMultipalQuize, TestBackupOneQuizeCorrect, TestBackupThreeQuize, Title,
+    NewClass, ResultTitle, SelectAcademic, ShowGrade, Section, Interpretation, TestBackupFiveQuize, TestBackupMultipalQuize, TestBackupOneQuizeCorrect, TestBackupThreeQuize, Title,
      ImageOptionsTest, OneOptionsTest,
     OptionsTest, AddTest, TestCategory, ThreeOptionsTest, FiveOptionsTest, SelectNumber,
     Reports, InterpretationGrade, Career
     )
 
+class SelectAcademicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SelectAcademic
+        fields = ['id', 'classOrCollage']
 
 class NewClassSerializer(serializers.ModelSerializer):
+    classOrCollage = SelectAcademicSerializer(many=False, read_only=True)
     class Meta:
         model = NewClass
-        fields = ['id', 'newClass']
+        fields = ['id', 'newClass', 'classOrCollage']
 
 class CareerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -97,6 +102,7 @@ class ResultTitleSerializer(serializers.ModelSerializer):
     class Meta:
         model = ResultTitle
         fields = ['typeOfTest', 'className', 'mainHeading', 'title', 'discription', 'point', 'the_json']
+
 
 
 class AddTestSerializer(serializers.ModelSerializer):

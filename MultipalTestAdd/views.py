@@ -1,5 +1,7 @@
+from django.db.models.aggregates import Count
 from django.db.models.query_utils import Q
 from rest_framework import serializers, status
+from rest_framework import response
 from rest_framework.fields import MultipleChoiceField, empty
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.views.decorators.csrf import csrf_exempt
@@ -32,7 +34,6 @@ from .serializer import (
 
 # # Create your views here.
 
-
 oneOption = 'One Quiz Correct Test'
 imageTest = "One Images Quiz Correct Test"
 allOption = "Mulitpal Quiz Select Test"
@@ -58,16 +59,23 @@ def testInfo(request):
     typeTest = ''
     Class = ''
     signal = ''
+
+    if filterByClass == None:
+        return Response(status.HTTP_404_NOT_FOUND)
     
     dis = AddTest.objects.filter(className = filterByClass)
     for i in dis:
         typeTest = i.typeOfTest.selectTest
         Class = i.className.newClass
-    objPayCheck = PaymentHistory.objects.filter(user = user, typeOfTest = typeTest, Class = Class)
-    if objPayCheck:
-        for i in objPayCheck:
-            if str(i.paymentCount) <= str(2):
+
+    try:
+        obj = PaymentHistory.objects.filter(user = user, typeOfTest = typeTest, Class = Class).latest('paymentCount')
+        if obj:
+            if obj.paymentCount == '1':
                 signal = "201"
+    except:
+        pass
+
     serializers = AddTestSerializer(dis, many=True)
     context = {"discreption" : serializers.data, "signal" : signal}
     return Response(context)
@@ -78,29 +86,96 @@ def testInfo(request):
 def paymentAndTest(request):
     user = request.user
     data = request.data
-
     filterByClass = data['id']
     typeTest = ''
     Class = ''
     Amount = ''
+
+    if filterByClass == None:
+        return Response(status.HTTP_404_NOT_FOUND)
 
     dis = AddTest.objects.filter(className = filterByClass)
     for i in dis:
         typeTest = i.typeOfTest.selectTest
         Class = i.className.newClass
         Amount = i.title.price
+    try:
+        obj = PaymentHistory.objects.filter(user = user, typeOfTest = typeTest, Class = Class).latest('paymentCount')
+        if obj:
+            if obj.paymentCount == '1':
+                    testData = testFunc(typeTest, dis)
+                    return Response(testData)
+            else:
+                payFuncObj = PaytemFunc(str(uuid.uuid4()), str(Amount) ,user.email, user, typeTest, Class)
+                return Response(payFuncObj)
+    except:
+        pass
+    payFuncObj = PaytemFunc(str(uuid.uuid4()), str(Amount) ,user.email, user, typeTest, Class)
+    return Response(payFuncObj)
 
-    objPayCheck = PaymentHistory.objects.filter(user = user, typeOfTest = typeTest, Class = Class)
-    if objPayCheck:
-        for i in objPayCheck:
-            if str(i.paymentCount) <= str(2):
-                testData = testFunc(typeTest, dis)
-                return Response(testData)
-    else:
-        payFuncObj = PaytemFunc(str(uuid.uuid4()), str(Amount) ,user.email, user, typeTest, Class)
-        return Response(payFuncObj)
-    return Response("error")
 
+
+def PaytemFunc(orderId, amount, userEmail, user, typeOfTest, Class):
+    param_dict={
+        'MID': settings.PAYTEM_MID,
+        'ORDER_ID': orderId,
+        'TXN_AMOUNT': amount,
+        'CUST_ID': userEmail,
+        'INDUSTRY_TYPE_ID': 'Retail',
+        'WEBSITE': 'WEBSTAGING',
+        'CHANNEL_ID': 'WEB',
+        'CALLBACK_URL':'http://127.0.0.1:8000/api/handlepayment/',
+        # 'CALLBACK_URL':'https://visheshsolanki.pythonanywhere.com/api/handlepayment/',
+    }
+    PaymentHistory.objects.create(
+        user = user, 
+        ORDER_ID = orderId, 
+        TXN_AMOUNT = amount, 
+        typeOfTest = typeOfTest, 
+        Class = Class,
+        email = userEmail,
+    )
+    param_dict['CHECKSUMHASH'] = Checksum.generate_checksum(param_dict, settings.PAYTEM_MERCHANT_KEY)
+    return param_dict
+    
+
+@csrf_exempt
+@api_view(['POST', 'GET'])
+# @authentication_classes([JWTAuthentication])
+# @permission_classes([IsAuthenticated])
+def HandlePaytemRequest(request):
+    form = request.POST
+    response_dict = {}
+    for i in form.keys():
+        response_dict[i] = form[i]
+        if i == 'CHECKSUMHASH':
+            checksum = form[i]
+    try:
+        verify = Checksum.verify_checksum(response_dict, settings.PAYTEM_MERCHANT_KEY, checksum)
+        if verify:
+            PaymentHistory.objects.filter(ORDER_ID = response_dict['ORDERID']).update(
+                gateway=response_dict['GATEWAYNAME'],
+                bankname=response_dict['BANKNAME'], 
+                TXNID=response_dict['TXNID'], 
+                status=response_dict['STATUS'], 
+                TXNDATE=response_dict['TXNDATE'],
+                RESPCODE=response_dict['RESPCODE'],
+                CURRENCY=response_dict['CURRENCY'],
+                PAYMENTMODE=response_dict['PAYMENTMODE'],
+                MID=response_dict['MID'],
+                paymentCount = '1',
+            )
+            if response_dict['RESPCODE'] == '01':
+                print('order successful')
+                url = "http://localhost:3000/paymentassessment"
+                return redirect(url)
+            else:
+                print('order was not successful because' + response_dict['RESPMSG'])
+                return Response(status.HTTP_304_NOT_MODIFIED)
+        return Response(status.HTTP_304_NOT_MODIFIED)
+    except:
+        return Response(status.HTTP_304_NOT_MODIFIED)
+##============================== End... ================================##
 
 
 def testFunc(typeTest, dis):
@@ -140,7 +215,6 @@ def testFunc(typeTest, dis):
     except:
         Response("Error")
 
-
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -153,6 +227,9 @@ def testBackup(request):
     section = data['section']
     question = data['question']
     object = data['obj']
+    lastTime = data['lastTime']
+
+
     testID = ''
     sectionID = ''
     questionID = ''
@@ -188,6 +265,7 @@ def testBackup(request):
                 className = classID,
                 oneQuizeCorrect = i.id,
                 testDiscription = addTestID,
+                lastTime = lastTime,
                 )
             return Response("ok")
 
@@ -205,15 +283,16 @@ def testBackup(request):
                 className = classID,
                 imageOneQuizeCorrect = i.id,
                 testDiscription = addTestID,
+                lastTime = lastTime,
                 )
             return Response("ok")
 
     elif typeTest == allOption:
         que = OptionsTest.objects.filter(section=sectionID, question=question)
         for i in que:
-            upBackup = TestBackupMultipalQuize.objects.filter(user = user ,className = classID, multipalQuize = i.id)
+            upBackup = TestBackupMultipalQuize.objects.filter(user = user ,className = classID, multipalQuize = i.id, userClickObj=object)
             if upBackup:
-                upBackup.update(userClickObj = object)
+                upBackup.delete()
                 return Response("ok")
             op = TestBackupMultipalQuize.objects.create(user = user, userClickObj = object)
             TestBackupMultipalQuize.objects.filter(id=op.id).update(
@@ -221,6 +300,7 @@ def testBackup(request):
                 className = classID,
                 multipalQuize = i.id,
                 testDiscription = addTestID,
+                lastTime = lastTime,
                 )
             return Response("ok")
     elif typeTest == fiveOption:
@@ -236,6 +316,7 @@ def testBackup(request):
                 className = classID,
                 fiveQuize = i.id,
                 testDiscription = addTestID,
+                lastTime = lastTime,
                 )
             return Response("ok")
             
@@ -252,6 +333,7 @@ def testBackup(request):
                 className = classID,
                 threeQuize = i.id,
                 testDiscription = addTestID,
+                lastTime = lastTime,
                 )
             return Response("ok")
 
@@ -267,6 +349,9 @@ def backupGet(request):
     data = request.data
     typeTest = data["typeOfTest"]
     Class = data['Class']
+
+    if Class == None or typeTest == None:
+        return Response(status.HTTP_404_NOT_FOUND)
 
     classID = ''
 
@@ -299,6 +384,68 @@ def backupGet(request):
         serializer = TestBackupFiveQuizeSerializer(que, many=True)
         return Response(serializer.data)
     
+
+@api_view(['GET'])
+# @authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def ResultGenerator(request):
+    user = request.user
+    data = request.data
+    # typeOfTest = data["typeOfTest"]
+    # Class = data['Class']
+
+    typeOfTest = threeOption
+    Class = '6'
+
+    classID = ''
+
+    context = {}
+    countNo = []
+    sec = ''
+    classType = NewClass.objects.filter(newClass = Class)
+    for i in classType:
+        classID = i.id
+         
+    if typeOfTest == threeOption:
+        que = TestBackupThreeQuize.objects.filter(user = user ,className = classID)
+        for i in que:
+            if i.threeQuize.section:
+                if i.threeQuize.a:
+                    context[i.threeQuize.section] = 1
+                    # countNo.append(1)
+                if i.threeQuize.b:
+                    # countNo.append(1)
+                    context[i.threeQuize.section] = 1
+                if i.threeQuize.c:
+                    # countNo.append(1)
+                    context[i.threeQuize.section] = 1
+                    # sec = i.threeQuize.section
+            
+    return Response("ok")
+     
+        
+
+    # if typeOfTest == oneOption:
+    #     que = TestBackupOneQuizeCorrect.objects.filter(user = user ,className = classID)
+    #     serializer = TestBackupOneQuizeCorrectSerializer(que, many=True)
+    #     return Response(serializer.data)
+
+    # elif typeOfTest == imageTest:
+    #     que = TestBackupOneImageQuizeCorrect.objects.filter(user = user ,className = classID)
+    #     serializer = TestBackupOneImageQuizeCorrectSerializer(que, many=True)
+    #     return Response(serializer.data)
+
+    # elif typeOfTest == allOption:
+    #     que = TestBackupMultipalQuize.objects.filter(user = user ,className = classID)
+    #     serializer = TestBackupMultipalQuizeSerializer(que, many=True)
+    #     return Response(serializer.data)
+
+
+    # elif typeOfTest == fiveOption:
+    #     que = TestBackupFiveQuize.objects.filter(user = user ,className = classID)
+
+    
+
 
 def CountSum(typeOfTest):
     countNo = []
@@ -358,8 +505,6 @@ def convertTuple(tup):
     return str
 
 
-
-
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -372,12 +517,20 @@ def saveResult(request):
     section = data['section']
     question = data['question']
     marks = data['marks']
+    secIDCount = ''
 
-    # print('typeOfTest', typeOfTest)
-    # print('Class', Class)
-    # print('section', section)
-    # print('question', question)
-    # print('marks', marks)
+    # print(typeOfTest)
+    # print(Class)
+    # print(section)
+    # print(question)
+    # print(marks)
+
+    if Class == None or typeOfTest == None:
+        return Response(status.HTTP_404_NOT_FOUND)
+
+    secObj = Section.objects.filter(section = section)
+    for i in secObj:
+        secIDCount = i.id
 
     try:
         carrer = data['carrer']
@@ -386,17 +539,9 @@ def saveResult(request):
     context = {}
     totalMarks = marks
 
-    objQue = Reports.objects.filter(user=user, Class=Class, section=section, typeOftest=typeOfTest, question = question)
-    if objQue:
-        if typeOfTest == allOption:
-            for i in objQue:
-                totalMarks = i.totalCount + int(marks)
-        else:
-            for i in objQue:
-                totalMarks = i.totalCount
 
-    obj = Reports.objects.filter(user=user, Class=Class, section=section, typeOftest=typeOfTest)
-    if obj:    
+    obj = Reports.objects.filter(user=user, Class=Class, section=section, typeOftest=typeOfTest) ##or Reports.objects.filter(user=user, Class=Class, section=section, typeOftest=typeOfTest, question = question)
+    if obj:  
         for i in obj:
             totalMarks = i.totalCount + int(marks)
     setSignal = ''
@@ -417,15 +562,14 @@ def saveResult(request):
             lastV = array[-1]
         array.append(lastV+1)
         nu = int(totalMarks)
+
         if nu in array:
             array = []
-            
-            obj = Reports.objects.filter(user=user, Class=Class, section=section, typeOftest=typeOfTest) or Reports.objects.filter(Class=Class, section=section, question=question, typeOftest=typeOfTest)
+            obj = Reports.objects.filter(user=user, Class=Class, section=section, typeOftest=typeOfTest) ##or Reports.objects.filter(Class=Class, section=section, question=question, typeOftest=typeOfTest)
             if obj: 
                 for i in obj:
                     _id = i.id
-                    totalMarks = i.totalCount + int(marks)
-                    
+               
                     in_idd = ''
                     interp = Interpretation.objects.all()
                     serializer = InterpretationSerializer(interp, many=True)
@@ -474,17 +618,26 @@ def saveResult(request):
                 carrerID = ''
                 countNO = []
                 toQuCount = ''
-
+                myArray = []
                 if typeOfTest == allOption:
-                    toQuCount = OptionsTest.objects.all().count()
+                    toQuCount = OptionsTest.objects.filter(section = secIDCount).count()
+                    NoCo = OptionsTest.objects.filter(section = secIDCount)
+                    for i in NoCo:
+                        myArray.append(i.a)
+                        myArray.append(i.b)
+                        myArray.append(i.c)
+                        if i.d:
+                            myArray.append(i.d)
+                        if i.e:
+                            myArray.append(i.e)
                 elif typeOfTest == imageTest:
-                    toQuCount = ImageOptionsTest.objects.all().count()
+                    toQuCount = ImageOptionsTest.objects.filter(section = secIDCount).count()
                 elif typeOfTest == oneOption:
-                    toQuCount = OneOptionsTest.objects.all().count()
+                    toQuCount = OneOptionsTest.objects.filter(section = secIDCount).count()
                 elif typeOfTest == threeOption:
-                    toQuCount = ThreeOptionsTest.objects.all().count()
+                    toQuCount = ThreeOptionsTest.objects.filter(section = secIDCount).count()
                 elif typeOfTest == fiveOption:
-                    toQuCount = FiveOptionsTest.objects.all().count()
+                    toQuCount = FiveOptionsTest.objects.filter(section = secIDCount).count()
 
                 typeTest = TestCategory.objects.filter(selectTest=typeOfTest)
                 for i in typeTest:
@@ -526,30 +679,23 @@ def saveResult(request):
                     elif typeOfTest == imageTest:
                         countNO.append(i.rightAns)
 
+
                 if typeOfTest == fiveOption:
-                    if sum(countNO) > 5:
-                        min = sum(countNO) - 5
-                        co = min * toQuCount
-                        if noSum != co:
-                            noSum = co
+                    noSum = max(countNO) * toQuCount
+                
+                if typeOfTest == allOption:
+                    mul = sum(countNO) * len(myArray)
+                    noSum = mul / len(countNO)
 
                 elif typeOfTest == threeOption:
-                    if sum(countNO) > 3:
-                        min = sum(countNO) - 3
-                        co = min * toQuCount
-                        if noSum != co:
-                            noSum = co 
+                    noSum = max(countNO) * toQuCount
                 
                 elif typeOfTest == imageTest:
-                    min = sum(countNO)
-                    co = min * toQuCount
-                    noSum = co
+                    noSum = max(countNO) * toQuCount
                 
                 elif typeOfTest == oneOption:
-                    min = sum(countNO)
-                    co = min * toQuCount
-                    noSum = co
-               
+                    noSum = max(countNO) * toQuCount
+
                 sec = Section.objects.filter(section=section)
                 for i in sec:
                     secID = i.id
@@ -582,6 +728,9 @@ def getResult(request):
     data = request.data
     typeOfTest = data["typeOfTest"]
     Class = data['Class']
+
+    if Class == None or typeOfTest == None:
+        return Response(status.HTTP_404_NOT_FOUND)
 
     if typeOfTest == allOption:
         que = Reports.objects.filter(user=user, Class = Class, typeOftest = typeOfTest)
@@ -621,6 +770,10 @@ def delReuslt(request):
     data = request.data
     typeOfTest = data["typeOfTest"]
     Class = data['Class']
+
+    if Class == None or typeOfTest == None:
+        return Response(status.HTTP_404_NOT_FOUND)
+        
     if typeOfTest == allOption:
         Reports.objects.filter(user=user, Class = Class, typeOftest = typeOfTest).delete()
         return Response("Successsfully Data Deleted")
@@ -649,6 +802,10 @@ def delBackup(request):
     data = request.data
     typeOfTest = data["typeOfTest"]
     Class = data['Class']
+
+    if Class == None or typeOfTest == None:
+        return Response(status.HTTP_404_NOT_FOUND)
+
     typeTestID = ''
     classID = ''
     obj = TestCategory.objects.filter(selectTest = typeOfTest)
@@ -710,6 +867,8 @@ def pandingTest(request):
     return Response(context)
 
 
+
+
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -722,7 +881,7 @@ def buyTest(request):
     if objPayment:
         context = {}
         for i in objPayment:
-            if str(i.paymentCount) <= str(2):
+            if str(i.paymentCount) == str(1):
                 typeTest = TestCategory.objects.filter(selectTest=i.typeOfTest)
                 for p in typeTest:
                     testID = p.id
@@ -744,80 +903,49 @@ def paymentDecriment(request):
     data = request.data
     typeOfTest = data["typeOfTest"]
     Class = data['Class']
-    countMinus = empty
-    obj = PaymentHistory.objects.filter(user = user, typeOfTest = typeOfTest, Class = str(Class))
+
+    if Class == None or typeOfTest == None:
+        return Response(status.HTTP_404_NOT_FOUND)
+
+    obj = PaymentHistory.objects.filter(user = user, typeOfTest = typeOfTest, Class = str(Class)).latest('paymentCount')
     if obj:
-        for i in obj:
-            if int(i.paymentCount) == 1:
-                countMinus = 0
-                obj.update(paymentCount = countMinus)
-                return Response("Payment Count Updated")
-            
-            countMinus = int(i.paymentCount) - 1
-            obj.update(paymentCount = countMinus)
+        if obj.paymentCount == '1':
+            PaymentHistory.objects.filter(id = obj.id).update(paymentCount = '0')
             return Response("Payment Count Updated")
+
+            # elif str(i.paymentCount) == str(2):
+            #     obj.update(paymentCount = '1')
+            #     return Response("Payment Count Updated")
+            
+            # if str(i.paymentCount) >= str(2):
+            #     int(i.paymentCount) - int(1)
+            #     obj.update(paymentCount = countMinus)
+            #     return Response("Payment Count Updated")
+
+            # if str(i.paymentCount) == str(0):
+            #     return Response("Payment Count Updated")
+
+        return Response("error")
     return Response("No Payment Count Updated")
 
 
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def checkPaymentRouter(request):
+    user = request.user
+    data = request.data
+    typeOfTest = data["typeOfTest"]
+    Class = data['Class']
+    if Class == None or typeOfTest == None:
+        return Response(status.HTTP_402_PAYMENT_REQUIRED)
+    obj = PaymentHistory.objects.filter(user = user, typeOfTest = typeOfTest, Class = Class).latest('paymentCount')
+    if obj:
+            if obj.paymentCount == '0':
+                return Response(status.HTTP_402_PAYMENT_REQUIRED)
+            else:
+                return Response(status.HTTP_202_ACCEPTED)
+    return Response(status.HTTP_402_PAYMENT_REQUIRED)
 
-def PaytemFunc(orderId, amount, userEmail, user, typeOfTest, Class):
-    param_dict={
-        'MID': settings.PAYTEM_MID,
-        'ORDER_ID': orderId,
-        'TXN_AMOUNT': amount,
-        'CUST_ID': userEmail,
-        'INDUSTRY_TYPE_ID': 'Retail',
-        'WEBSITE': 'WEBSTAGING',
-        'CHANNEL_ID': 'WEB',
-        'CALLBACK_URL':'http://127.0.0.1:8000/api/handlepayment/',
-        # 'CALLBACK_URL':'https://django-react-product.herokuapp.com/api/handlepayment/',
-    }
-    PaymentHistory.objects.create(
-        user = user, 
-        ORDER_ID = orderId, 
-        TXN_AMOUNT = amount, 
-        typeOfTest = typeOfTest, 
-        Class = Class,
-        email = userEmail,
-    )
-    param_dict['CHECKSUMHASH'] = Checksum.generate_checksum(param_dict, settings.PAYTEM_MERCHANT_KEY)
-    return param_dict
-    
 
-@csrf_exempt
-@api_view(['POST', 'GET'])
-# @authentication_classes([JWTAuthentication])
-# @permission_classes([IsAuthenticated])
-def HandlePaytemRequest(request):
-    form = request.POST
-    response_dict = {}
-    for i in form.keys():
-        response_dict[i] = form[i]
-        if i == 'CHECKSUMHASH':
-            checksum = form[i]
-    verify = Checksum.verify_checksum(response_dict, settings.PAYTEM_MERCHANT_KEY, checksum)
-    if verify:
-        PaymentHistory.objects.filter(ORDER_ID = response_dict['ORDERID']).update(
-            gateway=response_dict['GATEWAYNAME'],
-            bankname=response_dict['BANKNAME'], 
-            TXNID=response_dict['TXNID'], 
-            status=response_dict['STATUS'], 
-            TXNDATE=response_dict['TXNDATE'],
-            RESPCODE=response_dict['RESPCODE'],
-            CURRENCY=response_dict['CURRENCY'],
-            PAYMENTMODE=response_dict['PAYMENTMODE'],
-            MID=response_dict['MID'],
-            paymentCount = '2',
-        )
-        if response_dict['RESPCODE'] == '01':
-            print('order successful')
-            url = "http://localhost:3000/testpage"
-            return redirect(url)
-        else:
-            print('order was not successful because' + response_dict['RESPMSG'])
-            url = "http://localhost:3000/"
-            # url = "https://django-react-product.herokuapp.com/ordernotsuccess"
-            return redirect(url)
-    url = "http://localhost:3000/"
-    return redirect(url)
-##============================== End... ================================##
+

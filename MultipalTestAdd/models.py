@@ -9,13 +9,25 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
+class SelectAcademic(models.Model):
+    classOrCollage = models.CharField(max_length=400,null=True, blank=True)
+    class Meta: 
+        verbose_name_plural = "Add Working Professional & College"
+    def __str__(self):
+        return str(self.classOrCollage)
+
 class NewClass(models.Model):
+    classOrCollage = models.ForeignKey(SelectAcademic,on_delete=CASCADE,max_length=400, null=True, blank=True)
     newClass = models.CharField(max_length=400, null=True, blank=True)
+    class Meta:
+        verbose_name_plural = "Add Classes"
     def __str__(self):
         return str(f"{self.newClass} th")
 
 class Career(models.Model):
     newCareer = models.CharField(max_length=400, null=True, blank=True)
+    class Meta:
+        verbose_name_plural = "Add Career"
     def __str__(self):
         return str(self.newCareer)
     
@@ -24,17 +36,23 @@ class Title(models.Model):
     description = models.TextField(null=True, blank=True)
     duration = models.CharField(max_length=200,null=True, blank=True)
     price = models.FloatField(null=True, blank=True)
+    class Meta:
+        verbose_name_plural = "Test Title of Classes"
     def __str__(self):
         return str(f"{self.className}")
     
 
 class Section(models.Model):
     section = models.CharField(max_length=400, null=True, blank=True)
+    class Meta:
+        verbose_name_plural = "Add Section"
     def __str__(self):
         return str(self.section)
 
 class InterpretationGrade(models.Model):
     grade = models.CharField(max_length=400,null=True, blank=True)
+    class Meta:
+        verbose_name_plural = "Add Grades Name"
     def __str__(self):
         return str(self.grade)
 
@@ -44,8 +62,8 @@ class ShowGrade(models.Model):
     selectGrade = models.ForeignKey(InterpretationGrade,on_delete=CASCADE,max_length=400, null=True, blank=True)
     score = models.CharField(max_length=400, null=True, blank=True)
     the_json = jsonfield.JSONField()
-    
-
+    class Meta:
+        verbose_name_plural = "Add Grades Marking"
     def save(self, *args, **kwargs):
         the_json = {}
         op = ShowGrade.objects.filter(className = self.className) & ShowGrade.objects.filter(section = self.section)
@@ -73,7 +91,8 @@ class Interpretation(models.Model):
     point = models.CharField(max_length=400, null=True, blank=True)
     the_json = jsonfield.JSONField()
     the_title = jsonfield.JSONField()
-    
+    class Meta:
+        verbose_name_plural = "Add Grades Wise Interpretation"
     def save(self, *args, **kwargs):
         the_json = {}
         the_title = {}
@@ -120,6 +139,8 @@ class SelectNumber(models.Model):
     d = models.FloatField(null=True, blank=True)
     e = models.FloatField(null=True, blank=True)
     rightAns = models.FloatField(null=True, blank=True)
+    class Meta:
+        verbose_name_plural = "Add Options Marking in each Questions"
     def __str__(self):
         return str(f"{self.className}")
 
@@ -140,6 +161,8 @@ class ImageOptionsTest(models.Model):
     e = models.ImageField(upload_to = 'Image-Test', null=True, blank=True, max_length=200)
     eText = models.CharField(null=True, blank=True, max_length=400)
     rightAns = models.CharField(null=True, blank=True, max_length=300)
+    class Meta:
+        verbose_name_plural = "Add Image Type Test"
     def save(self, *args, **kwargs):
         if self.rightAns == 'a':
             self.rightAns = self.a
@@ -163,6 +186,8 @@ class OneOptionsTest(models.Model):
     c = models.CharField(max_length=400, null=True, blank=True)
     d = models.CharField(max_length=400, null=True, blank=True)
     rightAns = models.CharField(null=True, blank=True, max_length=300)
+    class Meta:
+        verbose_name_plural = "Add Single Marking Type Test"
     def save(self, *args, **kwargs):
         if self.rightAns == 'a':
             self.rightAns = self.a
@@ -186,6 +211,8 @@ class OptionsTest(models.Model):
     c = models.CharField(max_length=400, null=True, blank=True)
     d = models.CharField(max_length=400, null=True, blank=True)
     e = models.CharField(max_length=400, null=True, blank=True)
+    class Meta:
+        verbose_name_plural = "Add Multiple Marking Type Test"
     def __str__(self):
         return str(self.section)
 
@@ -197,6 +224,8 @@ class FiveOptionsTest(models.Model):
     c = models.CharField(max_length=400, null=True, blank=True)
     d = models.CharField(max_length=400, null=True, blank=True)
     e = models.CharField(max_length=400, null=True, blank=True)
+    class Meta:
+        verbose_name_plural = "Add Five Options Type Test"
     def __str__(self):
         return str(self.section)
 
@@ -207,12 +236,16 @@ class ThreeOptionsTest(models.Model):
     a = models.CharField(max_length=400, null=True, blank=True)
     b = models.CharField(max_length=400, null=True, blank=True)
     c = models.CharField(max_length=400, null=True, blank=True)
+    class Meta:
+        verbose_name_plural = "Add Three Options Type Test"
     def __str__(self):
         return str(self.section)
 
 
 class TestCategory(models.Model):
     selectTest = models.CharField(max_length=400, null=True, blank=True)
+    class Meta:
+        verbose_name_plural = "Define Type Of Test"
     def __str__(self):
         return str(self.selectTest)
 
@@ -224,7 +257,8 @@ class ResultTitle(models.Model):
     discription = models.TextField(null=True, blank=True)
     point = models.TextField(null=True, blank=True)
     the_json = jsonfield.JSONField()
-    
+    class Meta:
+        verbose_name_plural = "Add Report Title"
     def save(self, *args, **kwargs):
         the_json = {}
         op = ResultTitle.objects.filter(className = self.className)
@@ -244,6 +278,7 @@ class ResultTitle(models.Model):
         return str(f"{self.className}")
 
 
+
 class AddTest(models.Model):
     className = models.ForeignKey(NewClass,on_delete=CASCADE,max_length=400, null=True, blank=True)
     typeOfTest = models.ForeignKey(TestCategory,on_delete=CASCADE,max_length=400, null=True, blank=True)
@@ -251,6 +286,8 @@ class AddTest(models.Model):
     selectNumber = models.ForeignKey(SelectNumber,on_delete=CASCADE,max_length=400, null=True, blank=True)
     resultTitle = models.ForeignKey(ResultTitle,on_delete=CASCADE,max_length=400, null=True, blank=True)
     createAt = models.DateTimeField(null=True, blank=True, auto_now_add=True)
+    class Meta:
+        verbose_name_plural = "Add Test"
     def __str__(self):
         return str(f"{self.className}")
 
@@ -270,7 +307,6 @@ class Reports(models.Model):
     carrer = models.ForeignKey(Career,on_delete=CASCADE, max_length=500, null=True, blank=True)
     def __str__(self):
         return str(self.user)
-
 
 
 class TestBackupOneQuizeCorrect(models.Model):
