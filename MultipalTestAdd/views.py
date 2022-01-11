@@ -33,12 +33,12 @@ from .serializer import (
 
 
 # # Create your views here.
-
 oneOption = 'One Quiz Correct Test'
 imageTest = "One Images Quiz Correct Test"
 allOption = "Mulitpal Quiz Select Test"
 threeOption = "Three Quiz Test"
 fiveOption = "Five Quiz Test"
+
 
 @api_view(['GET'])
 # @authentication_classes([JWTAuthentication])
@@ -167,6 +167,7 @@ def HandlePaytemRequest(request):
             )
             if response_dict['RESPCODE'] == '01':
                 print('order successful')
+                # url = "https://my-guru-test.herokuapp.com/paymentassessment"
                 url = "http://localhost:3000/paymentassessment"
                 return redirect(url)
             else:
@@ -214,6 +215,7 @@ def testFunc(typeTest, dis):
         return Response("No test")
     except:
         Response("Error")
+
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
@@ -517,7 +519,8 @@ def saveResult(request):
     section = data['section']
     question = data['question']
     marks = data['marks']
-    secIDCount = ''
+    classID = ''
+    secID = ''
 
     # print(typeOfTest)
     # print(Class)
@@ -530,8 +533,16 @@ def saveResult(request):
 
     secObj = Section.objects.filter(section = section)
     for i in secObj:
-        secIDCount = i.id
+        secID = i.id
 
+    classObj = NewClass.objects.filter(newClass = Class)
+    for i in classObj:
+        classID = i.id
+    
+    sec = Section.objects.filter(section=section)
+    for i in sec:
+        secID = i.id
+    
     try:
         carrer = data['carrer']
     except:
@@ -539,13 +550,13 @@ def saveResult(request):
     context = {}
     totalMarks = marks
 
-
-    obj = Reports.objects.filter(user=user, Class=Class, section=section, typeOftest=typeOfTest) ##or Reports.objects.filter(user=user, Class=Class, section=section, typeOftest=typeOfTest, question = question)
+    
+    obj = Reports.objects.filter(user=user, Class=Class, section=section, typeOftest=typeOfTest) or Reports.objects.filter(user=user, Class=Class, section=section, typeOftest=typeOfTest, question = question)
     if obj:  
         for i in obj:
             totalMarks = i.totalCount + int(marks)
     setSignal = ''
-    que = ShowGrade.objects.all()
+    que = ShowGrade.objects.filter(className = classID, section = secID)
     for i in que:
         context = i.the_json
     for key in context:
@@ -565,13 +576,13 @@ def saveResult(request):
 
         if nu in array:
             array = []
-            obj = Reports.objects.filter(user=user, Class=Class, section=section, typeOftest=typeOfTest) ##or Reports.objects.filter(Class=Class, section=section, question=question, typeOftest=typeOfTest)
+            obj = Reports.objects.filter(user=user, Class=Class, section=section, typeOftest=typeOfTest) or Reports.objects.filter(user=user,Class=Class, section=section, question=question, typeOftest=typeOfTest)
             if obj: 
                 for i in obj:
                     _id = i.id
                
                     in_idd = ''
-                    interp = Interpretation.objects.all()
+                    interp = Interpretation.objects.filter(className = classID, section = secID)
                     serializer = InterpretationSerializer(interp, many=True)
                     for i in serializer.data:
                         in_idd = i['id']
@@ -595,7 +606,7 @@ def saveResult(request):
                         return Response("Update")
             else:
                 in_id = ''
-                interp = Interpretation.objects.all()
+                interp = Interpretation.objects.filter(className = classID, section = secID)
                 serializer = InterpretationSerializer(interp, many=True)
      
                 for i in serializer.data:
@@ -611,17 +622,16 @@ def saveResult(request):
                                 break
                     else:
                         continue
-                secID = ''
+                # secID = ''
                 testID = ''
-                classID = ''
                 noID = ''
                 carrerID = ''
                 countNO = []
                 toQuCount = ''
                 myArray = []
                 if typeOfTest == allOption:
-                    toQuCount = OptionsTest.objects.filter(section = secIDCount).count()
-                    NoCo = OptionsTest.objects.filter(section = secIDCount)
+                    toQuCount = OptionsTest.objects.filter(section = secID).count()
+                    NoCo = OptionsTest.objects.filter(section = secID)
                     for i in NoCo:
                         myArray.append(i.a)
                         myArray.append(i.b)
@@ -631,21 +641,18 @@ def saveResult(request):
                         if i.e:
                             myArray.append(i.e)
                 elif typeOfTest == imageTest:
-                    toQuCount = ImageOptionsTest.objects.filter(section = secIDCount).count()
+                    toQuCount = ImageOptionsTest.objects.filter(section = secID).count()
                 elif typeOfTest == oneOption:
-                    toQuCount = OneOptionsTest.objects.filter(section = secIDCount).count()
+                    toQuCount = OneOptionsTest.objects.filter(section = secID).count()
                 elif typeOfTest == threeOption:
-                    toQuCount = ThreeOptionsTest.objects.filter(section = secIDCount).count()
+                    toQuCount = ThreeOptionsTest.objects.filter(section = secID).count()
                 elif typeOfTest == fiveOption:
-                    toQuCount = FiveOptionsTest.objects.filter(section = secIDCount).count()
+                    toQuCount = FiveOptionsTest.objects.filter(section = secID).count()
 
                 typeTest = TestCategory.objects.filter(selectTest=typeOfTest)
                 for i in typeTest:
                     testID = i.id
 
-                classObj = NewClass.objects.filter(newClass = Class)
-                for i in classObj:
-                    classID = i.id
 
                 newTest = AddTest.objects.filter(className=classID, typeOfTest=testID)
                 for i in newTest:
@@ -695,10 +702,7 @@ def saveResult(request):
                 
                 elif typeOfTest == oneOption:
                     noSum = max(countNO) * toQuCount
-
-                sec = Section.objects.filter(section=section)
-                for i in sec:
-                    secID = i.id
+                
                 if carrer != 'null':
                     obj = Career.objects.filter(newCareer = carrer)
                     for i in obj:

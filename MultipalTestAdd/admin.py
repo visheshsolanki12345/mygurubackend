@@ -64,7 +64,7 @@ class InterpretationGradeModelAdmin(admin.ModelAdmin):
 
 @admin.register(ShowGrade)
 class ShowGradeModelAdmin(admin.ModelAdmin):
-    list_display = ['className', 'section', 'selectGrade', 'score', 'the_json']
+    list_display = ['className', 'section', 'the_json']
 
 
 @admin.register(Interpretation)
