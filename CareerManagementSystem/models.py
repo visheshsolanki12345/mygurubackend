@@ -6,7 +6,7 @@ import os
 
 # Create your models here.
 class CareerCategory(models.Model):
-    industry = models.CharField(null=True, blank=True, max_length=200)
+    industry = models.CharField(null=True, blank=True, max_length=400)
 
     def __str__(self):
         return str(self.industry)
@@ -15,7 +15,7 @@ def Banner_directory_path_main(instance, filename):
     profile_pic_name = f'Banner_Images/{instance.industry}/{filename}'
     full_path = os.path.join(settings.MEDIA_ROOT, profile_pic_name)
     if os.path.exists(full_path):
-    	os.remove(full_path)
+        os.remove(full_path)
     return profile_pic_name
 
 class Course(models.Model):

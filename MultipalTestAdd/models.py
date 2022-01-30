@@ -16,6 +16,12 @@ class SelectAcademic(models.Model):
     def __str__(self):
         return str(self.classOrCollage)
 
+
+class AddClassSection(models.Model):
+    classSection = models.CharField(max_length=400,null=True, blank=True)
+    def __str__(self):
+        return str(self.classSection)
+
 class NewClass(models.Model):
     classOrCollage = models.ForeignKey(SelectAcademic,on_delete=CASCADE,max_length=400, null=True, blank=True)
     newClass = models.CharField(max_length=400, null=True, blank=True)
@@ -23,6 +29,7 @@ class NewClass(models.Model):
         verbose_name_plural = "Add Classes"
     def __str__(self):
         return str(f"{self.newClass} th")
+
 
 class Career(models.Model):
     newCareer = models.CharField(max_length=400, null=True, blank=True)
@@ -33,13 +40,14 @@ class Career(models.Model):
     
 class Title(models.Model):
     className = models.ForeignKey(NewClass,on_delete=CASCADE,max_length=400, null=True, blank=True)
+    classSection = models.ForeignKey(AddClassSection,on_delete=CASCADE,max_length=400, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     duration = models.CharField(max_length=200,null=True, blank=True)
     price = models.FloatField(null=True, blank=True)
     class Meta:
         verbose_name_plural = "Test Title of Classes"
     def __str__(self):
-        return str(f"{self.className}")
+        return str(f"{self.className} - {self.classSection}")
     
 
 class Section(models.Model):
@@ -58,6 +66,7 @@ class InterpretationGrade(models.Model):
 
 class ShowGrade(models.Model):
     className = models.ForeignKey(NewClass,on_delete=CASCADE,max_length=400, null=True, blank=True)
+    classSection = models.ForeignKey(AddClassSection,on_delete=CASCADE,max_length=400, null=True, blank=True)
     section = models.ForeignKey(Section, on_delete=CASCADE, null=True, blank=True)
     selectGrade = models.ForeignKey(InterpretationGrade,on_delete=CASCADE,max_length=400, null=True, blank=True)
     score = models.CharField(max_length=400, null=True, blank=True)
@@ -66,7 +75,7 @@ class ShowGrade(models.Model):
         verbose_name_plural = "Add Grades Marking"
     def save(self, *args, **kwargs):
         the_json = {}
-        op = ShowGrade.objects.filter(className = self.className) & ShowGrade.objects.filter(section = self.section)
+        op = ShowGrade.objects.filter(className = self.className, section = self.section, classSection = self.classSection)
         if op:
             for i in op:
                 json = i.the_json
@@ -79,11 +88,12 @@ class ShowGrade(models.Model):
             self.the_json = the_json
             super(ShowGrade, self).save(*args, **kwargs)
     def __str__(self):
-        return str(f"{self.className}, {self.section}")
+        return str(f"{self.className} - {self.classSection} - {self.section}")
     
 
 class Interpretation(models.Model):
     className = models.ForeignKey(NewClass,on_delete=CASCADE,max_length=400, null=True, blank=True)
+    classSection = models.ForeignKey(AddClassSection,on_delete=CASCADE,max_length=400, null=True, blank=True)    
     section = models.ForeignKey(Section,on_delete=CASCADE,max_length=400, null=True, blank=True)
     grade = models.ForeignKey(ShowGrade,on_delete=CASCADE,max_length=400, null=True, blank=True)
     selectGrade = models.ForeignKey(InterpretationGrade,on_delete=CASCADE,max_length=400, null=True, blank=True)
@@ -96,7 +106,7 @@ class Interpretation(models.Model):
     def save(self, *args, **kwargs):
         the_json = {}
         the_title = {}
-        op = Interpretation.objects.filter(className = self.className, section = self.section, grade=self.grade)
+        op = Interpretation.objects.filter(className = self.className, section = self.section, grade=self.grade, classSection = self.classSection)
         if op:
             for i in op:
                 the_json = i.the_json
@@ -116,7 +126,7 @@ class Interpretation(models.Model):
             self.the_title = the_title
             super(Interpretation, self).save(*args, **kwargs)
     def __str__(self):
-        return str(f"{self.className}")
+        return str(f"{self.className} - {self.classSection}")
 
 
     # point = ListCharField(base_field=CharField(max_length=10),size=6,max_length=(6 * 11),)
@@ -133,6 +143,7 @@ class Interpretation(models.Model):
 
 class SelectNumber(models.Model):
     className = models.ForeignKey(NewClass,on_delete=CASCADE,max_length=400, null=True, blank=True)
+    classSection = models.ForeignKey(AddClassSection,on_delete=CASCADE,max_length=400, null=True, blank=True)        
     a = models.FloatField(null=True, blank=True)
     b = models.FloatField(null=True, blank=True)
     c = models.FloatField(null=True, blank=True)
@@ -142,7 +153,7 @@ class SelectNumber(models.Model):
     class Meta:
         verbose_name_plural = "Add Options Marking in each Questions"
     def __str__(self):
-        return str(f"{self.className}")
+        return str(f"{self.className} - {self.classSection}")
 
 
 
@@ -252,6 +263,7 @@ class TestCategory(models.Model):
 class ResultTitle(models.Model):
     typeOfTest = models.ForeignKey(TestCategory,on_delete=CASCADE,max_length=400, null=True, blank=True)
     className = models.ForeignKey(NewClass,on_delete=CASCADE,max_length=400, null=True, blank=True)
+    classSection = models.ForeignKey(AddClassSection,on_delete=CASCADE,max_length=400, null=True, blank=True)            
     mainHeading = models.CharField(null=True, blank=True, max_length=400)
     title = models.CharField(null=True, blank=True, max_length=400)
     discription = models.TextField(null=True, blank=True)
@@ -261,7 +273,7 @@ class ResultTitle(models.Model):
         verbose_name_plural = "Add Report Title"
     def save(self, *args, **kwargs):
         the_json = {}
-        op = ResultTitle.objects.filter(className = self.className)
+        op = ResultTitle.objects.filter(className = self.className, classSection = self.classSection)
         if op:
             for i in op:
                 json = i.the_json
@@ -275,12 +287,13 @@ class ResultTitle(models.Model):
             self.the_json = the_json
             super(ResultTitle, self).save(*args, **kwargs)
     def __str__(self):
-        return str(f"{self.className}")
+        return str(f"{self.className} - {self.classSection}")
 
 
 
 class AddTest(models.Model):
     className = models.ForeignKey(NewClass,on_delete=CASCADE,max_length=400, null=True, blank=True)
+    classSection = models.ForeignKey(AddClassSection,on_delete=CASCADE,max_length=400, null=True, blank=True)                
     typeOfTest = models.ForeignKey(TestCategory,on_delete=CASCADE,max_length=400, null=True, blank=True)
     title = models.ForeignKey(Title,on_delete=CASCADE,max_length=400, null=True, blank=True)
     selectNumber = models.ForeignKey(SelectNumber,on_delete=CASCADE,max_length=400, null=True, blank=True)
@@ -289,92 +302,104 @@ class AddTest(models.Model):
     class Meta:
         verbose_name_plural = "Add Test"
     def __str__(self):
-        return str(f"{self.className}")
+        return str(f"{self.className} - {self.classSection}")
 
 
 class Reports(models.Model):
     user = models.ForeignKey(User,on_delete=CASCADE, max_length=100, null=True, blank=True)
     Class = models.CharField(null=True, blank=True, max_length=200)
+    classSection = models.CharField(max_length=400, null=True, blank=True)                    
     section = models.CharField(null=True, blank=True, max_length=200)
-    question = models.CharField(null=True, blank=True, max_length=200)
+    # question = models.CharField(null=True, blank=True, max_length=200)
     interpretatio = models.ForeignKey(Interpretation,on_delete=CASCADE, max_length=500, null=True, blank=True)
     grade = models.CharField(null=True, blank=True, max_length=100)
     totalCount = models.IntegerField(null=True, blank=True)
-    CreateAt = models.DateTimeField(null=True, blank=True, auto_now_add=True)
-    industry_Grade = models.CharField(null=True, blank=True, max_length=200)
+    # CreateAt = models.DateTimeField(null=True, blank=True, auto_now_add=True)
+    # industry_Grade = models.CharField(null=True, blank=True, max_length=200)
     typeOftest = models.CharField(null=True, blank=True, max_length=200)
     totalNoQu = models.CharField(null=True, blank=True, max_length=200)
     carrer = models.ForeignKey(Career,on_delete=CASCADE, max_length=500, null=True, blank=True)
     def __str__(self):
-        return str(self.user)
+        return str(f"{self.user} - {self.Class} - {self.classSection}")
 
 
 class TestBackupOneQuizeCorrect(models.Model):
     user = models.ForeignKey(User,on_delete=CASCADE, max_length=100, null=True, blank=True)
     typeOfTest = models.ForeignKey(TestCategory,on_delete=CASCADE,max_length=400, null=True, blank=True)
     className = models.ForeignKey(NewClass,on_delete=CASCADE,max_length=400, null=True, blank=True)
+    classSection = models.ForeignKey(AddClassSection,on_delete=CASCADE,max_length=400, null=True, blank=True)                        
     oneQuizeCorrect = models.ForeignKey(OneOptionsTest,on_delete=CASCADE,max_length=400, null=True, blank=True)
     testDiscription = models.ForeignKey(AddTest,on_delete=CASCADE,max_length=400, null=True, blank=True)
     userClickObj = models.CharField(null=True, blank=True, max_length=400)
-    createAt = models.DateTimeField(null=True, blank=True, auto_now_add=True)
+    # createAt = models.DateTimeField(null=True, blank=True, auto_now_add=True)
     lastTime = models.CharField(null=True, blank=True, max_length=100)
+    number = models.CharField(null=True, blank=True, max_length=400)
     def __str__(self):
-        return str(f"{self.user} - {self.className}")
+        return str(f"{self.user} - {self.className} - {self.classSection}")
 
 
 class TestBackupOneImageQuizeCorrect(models.Model):
     user = models.ForeignKey(User,on_delete=CASCADE, max_length=100, null=True, blank=True)
     typeOfTest = models.ForeignKey(TestCategory,on_delete=CASCADE,max_length=400, null=True, blank=True)
     className = models.ForeignKey(NewClass,on_delete=CASCADE,max_length=400, null=True, blank=True)
+    classSection = models.ForeignKey(AddClassSection,on_delete=CASCADE,max_length=400, null=True, blank=True)                        
     imageOneQuizeCorrect = models.ForeignKey(ImageOptionsTest,on_delete=CASCADE,max_length=400, null=True, blank=True)
     testDiscription = models.ForeignKey(AddTest,on_delete=CASCADE,max_length=400, null=True, blank=True)
     userClickObj = models.CharField(null=True, blank=True, max_length=400)
-    createAt = models.DateTimeField(null=True, blank=True, auto_now_add=True)
+    # createAt = models.DateTimeField(null=True, blank=True, auto_now_add=True)
     lastTime = models.CharField(null=True, blank=True, max_length=100)
+    number = models.CharField(null=True, blank=True, max_length=400)
     def __str__(self):
-        return str(f"{self.user} - {self.className}")
+        return str(f"{self.user} - {self.className} - {self.classSection}")
 
 class TestBackupMultipalQuize(models.Model):
     user = models.ForeignKey(User,on_delete=CASCADE, max_length=100, null=True, blank=True)
     typeOfTest = models.ForeignKey(TestCategory,on_delete=CASCADE,max_length=400, null=True, blank=True)
     className = models.ForeignKey(NewClass,on_delete=CASCADE,max_length=400, null=True, blank=True)
+    classSection = models.ForeignKey(AddClassSection,on_delete=CASCADE,max_length=400, null=True, blank=True)                        
     multipalQuize = models.ForeignKey(OptionsTest,on_delete=CASCADE,max_length=400, null=True, blank=True)
     testDiscription = models.ForeignKey(AddTest,on_delete=CASCADE,max_length=400, null=True, blank=True)
     userClickObj = models.CharField(null=True, blank=True, max_length=400)
-    createAt = models.DateTimeField(null=True, blank=True, auto_now_add=True)
+    # createAt = models.DateTimeField(null=True, blank=True, auto_now_add=True)
     lastTime = models.CharField(null=True, blank=True, max_length=100)
+    number = models.CharField(null=True, blank=True, max_length=400)
     def __str__(self):
-        return str(f"{self.user} - {self.className}")
+        return str(f"{self.user} - {self.className} - {self.classSection}")
 
 class TestBackupFiveQuize(models.Model):
     user = models.ForeignKey(User,on_delete=CASCADE, max_length=100, null=True, blank=True)
     typeOfTest = models.ForeignKey(TestCategory,on_delete=CASCADE,max_length=400, null=True, blank=True)
     className = models.ForeignKey(NewClass,on_delete=CASCADE,max_length=400, null=True, blank=True)
+    classSection = models.ForeignKey(AddClassSection,on_delete=CASCADE,max_length=400, null=True, blank=True)                        
     fiveQuize = models.ForeignKey(FiveOptionsTest,on_delete=CASCADE,max_length=400, null=True, blank=True)
     testDiscription = models.ForeignKey(AddTest,on_delete=CASCADE,max_length=400, null=True, blank=True)
     userClickObj = models.CharField(null=True, blank=True, max_length=400)
-    createAt = models.DateTimeField(null=True, blank=True, auto_now_add=True)
+    # createAt = models.DateTimeField(null=True, blank=True, auto_now_add=True)
     lastTime = models.CharField(null=True, blank=True, max_length=100)
+    number = models.CharField(null=True, blank=True, max_length=400)
     def __str__(self):
-        return str(f"{self.user} - {self.className}")
+        return str(f"{self.user} - {self.className} - {self.classSection}")
 
 class TestBackupThreeQuize(models.Model):
     user = models.ForeignKey(User,on_delete=CASCADE, max_length=100, null=True, blank=True)
     typeOfTest = models.ForeignKey(TestCategory,on_delete=CASCADE,max_length=400, null=True, blank=True)
     className = models.ForeignKey(NewClass,on_delete=CASCADE,max_length=400, null=True, blank=True)
+    classSection = models.ForeignKey(AddClassSection,on_delete=CASCADE,max_length=400, null=True, blank=True)                        
     threeQuize = models.ForeignKey(ThreeOptionsTest,on_delete=CASCADE,max_length=400, null=True, blank=True)
     testDiscription = models.ForeignKey(AddTest,on_delete=CASCADE,max_length=400, null=True, blank=True)
     userClickObj = models.CharField(null=True, blank=True, max_length=400)
-    createAt = models.DateTimeField(null=True, blank=True, auto_now_add=True)
+    # createAt = models.DateTimeField(null=True, blank=True, auto_now_add=True)
     lastTime = models.CharField(null=True, blank=True, max_length=100)
+    number = models.CharField(null=True, blank=True, max_length=400)
     def __str__(self):
-        return str(f"{self.user} - {self.className}")
+        return str(f"{self.user} - {self.className} - {self.classSection}")
 
 
 class PaymentHistory(models.Model):
     user = models.ForeignKey(User,on_delete=CASCADE,max_length=400, null=True, blank=True)
     typeOfTest = models.CharField(max_length=400, null=True, blank=True)
     Class = models.CharField(max_length=400, null=True, blank=True)
+    classSection = models.CharField(max_length=400, null=True, blank=True)                    
     ORDER_ID = models.CharField(max_length=400, null=True, blank=True)
     TXN_AMOUNT = models.CharField(max_length=400, null=True, blank=True)
     email = models.CharField(max_length=400, null=True, blank=True)
@@ -391,5 +416,5 @@ class PaymentHistory(models.Model):
     createAt = models.DateTimeField(null=True, blank=True, auto_now_add=True)
 
     def __str__(self):
-        return str(f"{self.user} - {self.Class}" )
+        return str(f"{self.user} - {self.Class} - {self.classSection}" )
     
