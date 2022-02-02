@@ -3,7 +3,7 @@ from django.db import models
 # Create your models here.
 
 class YouTubeVideo(models.Model):
-    videoLink = models.CharField(max_length=300, null=True, blank=True)
+    videoLink = models.URLField(max_length=400, null=True, blank=True)
     videoTitle = models.CharField(max_length=300, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     createAt = models.DateTimeField( auto_now_add=True, null=True, blank=True)

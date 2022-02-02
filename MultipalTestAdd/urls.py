@@ -18,7 +18,7 @@ urlpatterns = [
     path('payment-router/', views.checkPaymentRouter, name="payment-router"),
     path('test/', views.saveBackup_all, name="test"),
 
-    # path('self/', views.ResultGenerator, name="self"),
+    path('self/', views.findSection, name="self"),
 
     # // payment URL
     path('handlepayment/', views.HandlePaytemRequest, name='HandleRequest'),

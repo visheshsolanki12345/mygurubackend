@@ -10,9 +10,9 @@ from .models import (
 from django.contrib.admin import AdminSite, sites
 
 
-@admin.register(SelectAcademic)
-class SelectAcademicModelAdmin(admin.ModelAdmin):
-    list_display = ['id', 'classOrCollage']
+# @admin.register(SelectAcademic)
+# class SelectAcademicModelAdmin(admin.ModelAdmin):
+#     list_display = ['id', 'classOrCollage']
 
 @admin.register(NewClass)
 class NewClassModelAdmin(admin.ModelAdmin):
@@ -31,28 +31,28 @@ class SectionModelAdmin(admin.ModelAdmin):
     list_display = ['id', 'section']
 
 
-@admin.register(ImageOptionsTest)
-class ImageOptionsTestModelAdmin(admin.ModelAdmin):
-    list_display = ['section', 'question', 'questionText', 'a','aText', 'b','bText', 'c', 'cText', 'd', 'dText', 'rightAns']
+# @admin.register(ImageOptionsTest)
+# class ImageOptionsTestModelAdmin(admin.ModelAdmin):
+#     list_display = ['section', 'question', 'questionText', 'a','aText', 'b','bText', 'c', 'cText', 'd', 'dText', 'rightAns']
 
 
-@admin.register(OneOptionsTest)
-class OneOptionsTestModelAdmin(admin.ModelAdmin):
-    list_display = ['section', 'question', 'questionImage', 'a', 'b', 'c', 'd', 'rightAns']
+# @admin.register(OneOptionsTest)
+# class OneOptionsTestModelAdmin(admin.ModelAdmin):
+#     list_display = ['section', 'question', 'questionImage', 'a', 'b', 'c', 'd', 'rightAns']
 
 
-@admin.register(OptionsTest)
-class OptionsTestModelAdmin(admin.ModelAdmin):
-    list_display = ['career', 'section', 'question', 'a', 'b', 'c', 'd', 'e']
+# @admin.register(OptionsTest)
+# class OptionsTestModelAdmin(admin.ModelAdmin):
+#     list_display = ['career', 'section', 'question', 'a', 'b', 'c', 'd', 'e']
 
 
 @admin.register(ThreeOptionsTest)
 class ThreeOptionsTestModelAdmin(admin.ModelAdmin):
     list_display = ['section', 'question', 'a', 'b', 'c']
 
-@admin.register(FiveOptionsTest)
-class FiveOptionsTestModelAdmin(admin.ModelAdmin):
-    list_display = ['section', 'question', 'a', 'b', 'c', 'd', 'e']
+# @admin.register(FiveOptionsTest)
+# class FiveOptionsTestModelAdmin(admin.ModelAdmin):
+#     list_display = ['section', 'question', 'a', 'b', 'c', 'd', 'e']
 
 
 @admin.register(TestCategory)
@@ -60,9 +60,9 @@ class TestCategoryModelAdmin(admin.ModelAdmin):
     list_display = ['id', 'selectTest']
 
 
-@admin.register(InterpretationGrade)
-class InterpretationGradeModelAdmin(admin.ModelAdmin):
-    list_display = ['id', 'grade']
+# @admin.register(InterpretationGrade)
+# class InterpretationGradeModelAdmin(admin.ModelAdmin):
+#     list_display = ['id', 'grade']
 
 
 @admin.register(ShowGrade)
@@ -80,9 +80,9 @@ class SelectNumberModelAdmin(admin.ModelAdmin):
     list_display = ['className', 'classSection', 'a', 'b', 'c', 'd', 'e', 'rightAns']
 
 
-@admin.register(Title)
-class TitleModelAdmin(admin.ModelAdmin):
-    list_display = ['className', 'classSection', 'description', 'duration', 'price']
+# @admin.register(Title)
+# class TitleModelAdmin(admin.ModelAdmin):
+#     list_display = ['className', 'classSection', 'description', 'duration', 'price']
 
 
 @admin.register(ResultTitle)
@@ -99,27 +99,27 @@ class AddTestModelAdmin(admin.ModelAdmin):
 class ReportsModelAdmin(admin.ModelAdmin):
     list_display = ['id','user', 'Class', 'classSection', 'carrer', 'section', 'interpretatio', 'grade', 'totalCount', 'typeOftest', 'totalNoQu']
 
-@admin.register(PaymentHistory)
-class PaymentHistoryModelAdmin(admin.ModelAdmin):
-    list_display = ['user', 'typeOfTest', 'classSection', 'Class', 'ORDER_ID', 'TXN_AMOUNT', 'email', 'status', 'gateway', 'bankname', 'TXNID', 'TXNDATE', 'paymentCount', 'CURRENCY', 'PAYMENTMODE', 'MID', 'RESPCODE']
+# @admin.register(PaymentHistory)
+# class PaymentHistoryModelAdmin(admin.ModelAdmin):
+#     list_display = ['user', 'typeOfTest', 'classSection', 'Class', 'ORDER_ID', 'TXN_AMOUNT', 'email', 'status', 'gateway', 'bankname', 'TXNID', 'TXNDATE', 'paymentCount', 'CURRENCY', 'PAYMENTMODE', 'MID', 'RESPCODE']
 
-@admin.register(TestBackupOneQuizeCorrect)
-class TestBackupOneQuizeCorrectModelAdmin(admin.ModelAdmin):
-    list_display = ['user', 'typeOfTest', 'className', 'classSection', 'oneQuizeCorrect', 'testDiscription', 'userClickObj', 'lastTime', 'number']
+# @admin.register(TestBackupOneQuizeCorrect)
+# class TestBackupOneQuizeCorrectModelAdmin(admin.ModelAdmin):
+#     list_display = ['user', 'typeOfTest', 'className', 'classSection', 'oneQuizeCorrect', 'testDiscription', 'userClickObj', 'lastTime', 'number']
 
-@admin.register(TestBackupOneImageQuizeCorrect)
-class TestBackupOneImageQuizeCorrectModelAdmin(admin.ModelAdmin):
-    list_display = ['user', 'typeOfTest', 'className', 'classSection', 'imageOneQuizeCorrect', 'testDiscription', 'userClickObj', 'lastTime', 'number']
-
-
-@admin.register(TestBackupMultipalQuize)
-class TestBackupMultipalQuizeModelAdmin(admin.ModelAdmin):
-    list_display = ['user', 'typeOfTest', 'className', 'classSection', 'multipalQuize', 'testDiscription', 'userClickObj', 'lastTime', 'number']
+# @admin.register(TestBackupOneImageQuizeCorrect)
+# class TestBackupOneImageQuizeCorrectModelAdmin(admin.ModelAdmin):
+#     list_display = ['user', 'typeOfTest', 'className', 'classSection', 'imageOneQuizeCorrect', 'testDiscription', 'userClickObj', 'lastTime', 'number']
 
 
-@admin.register(TestBackupFiveQuize)
-class TestBackupFiveQuizeModelAdmin(admin.ModelAdmin):
-    list_display = ['user', 'typeOfTest', 'className', 'classSection', 'fiveQuize', 'testDiscription', 'userClickObj', 'lastTime', 'number']
+# @admin.register(TestBackupMultipalQuize)
+# class TestBackupMultipalQuizeModelAdmin(admin.ModelAdmin):
+#     list_display = ['user', 'typeOfTest', 'className', 'classSection', 'multipalQuize', 'testDiscription', 'userClickObj', 'lastTime', 'number']
+
+
+# @admin.register(TestBackupFiveQuize)
+# class TestBackupFiveQuizeModelAdmin(admin.ModelAdmin):
+#     list_display = ['user', 'typeOfTest', 'className', 'classSection', 'fiveQuize', 'testDiscription', 'userClickObj', 'lastTime', 'number']
 
 
 @admin.register(TestBackupThreeQuize)
@@ -128,24 +128,24 @@ class TestBackupThreeQuizeModelAdmin(admin.ModelAdmin):
 
 
 
-def get_app_list(self, request):
-    """
-    Return a sorted list of all the installed apps that have been
-    registered in this site.
-    """
-    # Retrieve the original list
-    app_dict = self._build_app_dict(request)
-    app_list = sorted(app_dict.values(), key=lambda x: x['name'].lower())
+# def get_app_list(self, request):
+#     """
+#     Return a sorted list of all the installed apps that have been
+#     registered in this site.
+#     """
+#     # Retrieve the original list
+#     app_dict = self._build_app_dict(request)
+#     app_list = sorted(app_dict.values(), key=lambda x: x['name'].lower())
 
-    # Sort the models customably within each app.
-    for app in app_list:
-        if app['app_label'] == 'auth':
-            ordering = {
-                'Users': 1,
-                'Groups': 2
-            }
-            app['models'].sort(key=lambda x: ordering[x['name']])
+#     # Sort the models customably within each app.
+#     for app in app_list:
+#         if app['app_label'] == 'auth':
+#             ordering = {
+#                 'Users': 1,
+#                 'Groups': 2
+#             }
+#             app['models'].sort(key=lambda x: ordering[x['name']])
 
-    return app_list
+#     return app_list
 
-admin.AdminSite.get_app_list = get_app_list
+# admin.AdminSite.get_app_list = get_app_list
