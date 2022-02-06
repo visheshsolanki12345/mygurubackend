@@ -1,4 +1,3 @@
-from imp import acquire_lock
 from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.views.decorators.csrf import csrf_exempt
@@ -467,16 +466,12 @@ def resultGeneratorBackup(user, typeOfTest, Class, classSection):
         var = 0
     return context
 
-@api_view(['GET'])
+# @api_view(['GET'])
 # @authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated])
-def findSection(request):
-    user = request.user
-    typeOfTest = "Three Quiz Test"
+# @permission_classes([IsAuthenticated])
+def findSectionResult(user, typeOfTest, Class, classSection):
     classID = ''
     classSectionId = ''
-    classSection = '1'
-    Class = '6'
     secID = ''
 
     classObj = NewClass.objects.filter(newClass = Class)
@@ -489,12 +484,33 @@ def findSection(request):
 
     
     arraySet = set()
-    sectionAll = ThreeOptionsTest.objects.all()
-    for i in sectionAll:
-        arraySet.add(i.section)
+
+    if typeOfTest == allOption:
+        sectionAll = OptionsTest.objects.all()
+        for i in sectionAll:
+            arraySet.add(i.section)
+    elif typeOfTest == imageTest:
+        sectionAll = ImageOptionsTest.objects.all()
+        for i in sectionAll:
+            arraySet.add(i.section)
+
+    elif typeOfTest == oneOption:
+        sectionAll = OneOptionsTest.objects.all()
+        for i in sectionAll:
+            arraySet.add(i.section)
+
+    elif typeOfTest == threeOption:
+        sectionAll = ThreeOptionsTest.objects.all()
+        for i in sectionAll:
+            arraySet.add(i.section)
+
+    elif typeOfTest == fiveOption:
+        sectionAll = FiveOptionsTest.objects.all()
+        for i in sectionAll:
+            arraySet.add(i.section)
+    
     
     for allSecId in arraySet:
-
         secID = Section.objects.get(section = allSecId)
 
         countNO = []
@@ -576,9 +592,11 @@ def findSection(request):
         
         elif typeOfTest == oneOption:
             noSum = max(countNO) * toQuCount
-        Reports.objects.create(user = user, section = allSecId.section, totalCount = '0', totalNoQu = noSum, typeOftest = typeOfTest, classSection = classSection, Class = Class)
-
-    return True
+        Reports.objects.create(
+            user = user, section = allSecId.section, totalCount = '0', totalNoQu = noSum,
+            typeOftest = typeOfTest, classSection = classSection, Class = Class, grade = "Not Attempted"
+        )
+    return
 
 
 
@@ -687,88 +705,7 @@ def saveResult(user, typeOfTest, Class, classSection):
                 interp = Interpretation.objects.filter(className = classID, classSection = classSectionId, section = secID)
                 for i in interp:
                     in_id = i.id
-                    # print(f"{key1} : {grade} => {value1}")
                     carrerID = ''
-                    countNO = []
-                    toQuCount = ''
-                    myArray = []
-                    noID = ''
-                    testID = ''
-                    
-                    if typeOfTest == allOption:
-                        toQuCount = OptionsTest.objects.filter(section = secID).count()
-                        NoCo = OptionsTest.objects.filter(section = secID)
-                        for i in NoCo:
-                            myArray.append(i.a)
-                            myArray.append(i.b)
-                            myArray.append(i.c)
-                            if i.d:
-                                myArray.append(i.d)
-                            if i.e:
-                                myArray.append(i.e)
-
-                    elif typeOfTest == imageTest:
-                        toQuCount = ImageOptionsTest.objects.filter(section = secID).count()
-                    elif typeOfTest == oneOption:
-                        toQuCount = OneOptionsTest.objects.filter(section = secID).count()
-                    elif typeOfTest == threeOption:
-                        toQuCount = ThreeOptionsTest.objects.filter(section = secID).count()
-                    elif typeOfTest == fiveOption:
-                        toQuCount = FiveOptionsTest.objects.filter(section = secID).count()
-
-                    typeTest = TestCategory.objects.filter(selectTest=typeOfTest)
-                    for i in typeTest:
-                        testID = i.id
-
-
-                    newTest = AddTest.objects.filter(className=classID, classSection = classSectionId, typeOfTest=testID)
-                    for i in newTest:
-                        noID = i.selectNumber.id
-                    
-                    noSum = CountSum(typeOfTest)
-                    noObj = SelectNumber.objects.filter(id=noID)
-                    for i in noObj:
-                        if typeOfTest == allOption:
-                            countNO.append(i.a)
-                            countNO.append(i.b)
-                            countNO.append(i.c)
-                            countNO.append(i.d)
-                            countNO.append(i.e)
-
-                        elif typeOfTest == threeOption:
-                            countNO.append(i.a)
-                            countNO.append(i.b)
-                            countNO.append(i.c)
-
-                        elif typeOfTest == fiveOption:
-                            countNO.append(i.a)
-                            countNO.append(i.b)
-                            countNO.append(i.c)
-                            countNO.append(i.d)
-                            countNO.append(i.e)
-
-                        elif typeOfTest == oneOption:
-                            countNO.append(i.rightAns)
-
-                        elif typeOfTest == imageTest:
-                            countNO.append(i.rightAns)
-
-
-                    if typeOfTest == fiveOption:
-                        noSum = max(countNO) * toQuCount
-                    
-                    if typeOfTest == allOption:
-                        mul = sum(countNO) * len(myArray)
-                        noSum = mul / len(countNO)
-
-                    elif typeOfTest == threeOption:
-                        noSum = max(countNO) * toQuCount
-                    
-                    elif typeOfTest == imageTest:
-                        noSum = max(countNO) * toQuCount
-                    
-                    elif typeOfTest == oneOption:
-                        noSum = max(countNO) * toQuCount
                     
                     # if carrer != None:
                         # obj = Career.objects.filter(newCareer = carrer)
@@ -776,9 +713,6 @@ def saveResult(user, typeOfTest, Class, classSection):
                         #     carrerID = i.id
                     
                     Reports.objects.filter(user=user,Class=Class, classSection = classSectionId,section=key1, typeOftest=typeOfTest).update(grade=grade, totalCount=totalMarks,interpretatio = in_id, carrer = carrerID)
-                    # opj = Reports.objects.create(user=user,Class=Class, classSection = classSectionId, section=key1, grade=grade, totalCount=totalMarks, typeOftest=typeOfTest, totalNoQu = noSum)
-                    # if opj:
-                    #     Reports.objects.filter(id = opj.id).update(interpretatio = in_id, carrer = carrerID)
                 continue
              
 
@@ -1047,6 +981,14 @@ class ResultShowDeleteAll:
         self.Class = Class    
         self.classSection = classSection    
 
+    def save_section(self):
+        self.lock.acquire()
+        findSectionResult(
+            self.user, self.typeOfTest, self.Class, self.classSection,
+        )
+        self.lock.notify()
+        self.lock.release()
+
     def save_result(self):
         self.lock.acquire()
         saveResult(
@@ -1071,14 +1013,20 @@ class ResultShowDeleteAll:
         )
 
     def del_backup(self):
+        self.lock.acquire()
         delBackup(
             self.user, self.typeOfTest, self.Class, self.classSection, 
         )
+        self.lock.notify()
+        self.lock.release()
     
     def del_result(self):
+        self.lock.acquire()
         delReuslt(
             self.user, self.typeOfTest, self.Class, self.classSection, 
         )
+        self.lock.notify()
+        self.lock.release()
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
@@ -1095,23 +1043,27 @@ def getResult(request):
     getResultDelEtc = ResultShowDeleteAll(
         user, typeOfTest, Class, classSection, 
         )
+    
+    ss = Thread(target=getResultDelEtc.save_section)
     sr = Thread(target=getResultDelEtc.save_result)
     gr = Thread(target=getResultDelEtc.get_result)
-    # pd = Thread(target=getResultDelEtc.payment_decriment)
+    pd = Thread(target=getResultDelEtc.payment_decriment)
     db = Thread(target=getResultDelEtc.del_backup)
-    # dr = Thread(target=getResultDelEtc.del_result)
+    dr = Thread(target=getResultDelEtc.del_result)
 
+    ss.start()
     sr.start()
     gr.start()
-    # pd.start()
+    pd.start()
     db.start()
-    # dr.start()
+    dr.start()
 
+    ss.join()
     sr.join()
     gr.join()
-    # pd.join()
+    pd.join()
     db.join()
-    # dr.join()
+    dr.join()
     # end = time.time()
     # print(f"Runtime of the program is {end - start}")
     return Response(getResultDelEtc.getResultData)

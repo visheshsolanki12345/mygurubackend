@@ -9,9 +9,10 @@ urlpatterns = [
     # path('', TemplateView.as_view(template_name='index.html')),
     path('admin/', admin.site.urls),
     path('api/', include("authentication.urls")),
-    path('api/', include("CareerManagementSystem.urls")),
-    path('api/videos/', include("videoCarrer.urls")),
+    path('api/carrer/', include("CareerManagementSystem.urls")),
+    path('api/video/', include("videoCarrer.urls")),
     path('api/', include("MultipalTestAdd.urls")),
+    path('api/comman-function/', include("CommanFunctions.urls")),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

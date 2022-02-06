@@ -26,6 +26,8 @@ INSTALLED_APPS = [
     'videoCarrer',
     'MultipalTestAdd',
     'CareerManagementSystem',
+    'CommanFunctions',
+    
 ]
 
 

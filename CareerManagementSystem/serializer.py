@@ -1,6 +1,8 @@
+from authentication.serializer import userCustomSerializer, UserSerializerWithProfile
 from .models import (
     CarrerType, Carrer, CarrerPage, StudentFeaturedArticle, 
-    EditorApproveArticle, Counsellor, CounsellorSlot, BookUserSlot
+    EditorApproveArticle, Counsellor, CounsellorSlot, BookUserSlot,
+    ArticleRating, ArticleNoView
 )
 
 from rest_framework import serializers
@@ -22,46 +24,51 @@ class CarrerPageSerializer(serializers.ModelSerializer):
     carrer = CarrerSerializer(many=False, read_only=True)
     class Meta:
         model = CarrerPage
-        fields = ['id', 'carrer', 'heading', 'bannerImage', 'description']
+        fields = ['id', 'carrer', 'heading', 'bannerImage', 'thumbnailImage', 'description']
 
 
 class StudentFeaturedArticleSerializer(serializers.ModelSerializer):
     carrer = CarrerSerializer(many=False, read_only=True)
     class Meta:
         model = StudentFeaturedArticle
-        fields = ['id', 'user', 'carrer', 'heading', 'description', 'bannerImage', 'articleApprove', 'createAt']
+        fields = ['id', 'user', 'carrer', 'title', 'heading', 'description', 'bannerImage', 'thumbnailImage', 'articleApprove', 'createAt']
 
 
 class EditorApproveArticleSerializer(serializers.ModelSerializer):
     studentArticle = StudentFeaturedArticleSerializer(many=False, read_only=True)
-    # createAt = serializers.DateTimeField(format = "%B %d, %Y, %I:%M%p")
+    user = userCustomSerializer(many=False, read_only=True)
     class Meta:
         model = EditorApproveArticle
         fields = [
             'id', 'user', 'studentArticle', 'paymentChoices', 'articleApprove', 
-            'ammount', 'createAt', 'createAt'
+            'ammount', 'createAt', 'createAt', 'rating', 'noView',
         ]
 
 class CounsellorSerializer(serializers.ModelSerializer):
     carrer = CarrerSerializer(many=False, read_only=True)
+    user = UserSerializerWithProfile(many=False, read_only=True)
     class Meta:
         model = Counsellor
         fields = [
             'id', 'user', 'carrer', 'title', 'qualification', 'mobile', 'experience', 
             'college', 'designation', 'address', 'pincode', 'area', 'aboutUs', 
-            'language', 'price', 'dateOfBirth', 'gender', 'createAt'
+            'language', 'price', 'dateOfBirth', 'gender', 'createAt', 'bannerImage',
+            'rating', 'noView',
         ]
 
 
 class CounsellorSlotSerializer(serializers.ModelSerializer):
-    carrer = CounsellorSerializer(many=False, read_only=True)
+    # counsellor = CounsellorSerializer(many=False, read_only=True)
+    # date = serializers.DateField(format="%d/%m/%Y")
+    timeFrom = serializers.TimeField(format="%H:%M")
+    timeTo = serializers.TimeField(format="%H:%M")
     class Meta:
         model = CounsellorSlot
         fields = ['id', 'counsellor', 'date', 'timeFrom', 'timeTo', 'isBook']
 
 
 class BookUserSlotSerializer(serializers.ModelSerializer):
-    carrer = CounsellorSerializer(many=False, read_only=True)
+    counsellorSlot = CounsellorSerializer(many=False, read_only=True)
     class Meta:
         model = BookUserSlot
         fields = ['id', 'user', 'counsellorSlot']

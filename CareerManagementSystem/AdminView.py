@@ -51,8 +51,10 @@ class PostStudentArticle:
             StudentFeaturedArticle.objects.create(
                 user=self.user,
                 carrer=self.obj,
+                title=self.data['title'],
                 heading=self.data['heading'],
                 description=self.data['description'],
+                thumbnailImage=self.file['thumbnailImage'],
                 bannerImage=self.file['bannerImage'],
             )
             self.signal = True
@@ -61,8 +63,31 @@ class PostStudentArticle:
             self.signal = False
             return
     
+    def update_th(self, id, request):
+        try:
+            StudentFeaturedArticle.objects.filter(id = id, articleApprove = "Panding").update(
+                title=self.data['title'],
+                heading=self.data['heading'],
+                description=self.data['description'],
+                thumbnailImage=self.file['thumbnailImage'],
+                bannerImage=self.file['bannerImage'],
+            )
+            self.signal = True
+            return
+        except:
+            self.signal = False
+            return
+    
+    def update_th_edi_bye(self, id, request):
+        self.signal = views.get_student_featured_article(id, self.request, "editorByeUpdate")
+        return
+
     def all_data_th(self):
         self.allData = views.get_student_featured_article("null", self.request, "userWise")
+        return
+
+    def all_data_th_edi_by(self):
+        self.allData = views.get_student_featured_article("null", self.request, "editorBye")
         return
     
     def single_data_th(self, id):
@@ -212,6 +237,33 @@ class GetEditorArticleAdminView:
             return False
 
 
+class GetStudentArticleByEditor:
+    def __init__(self):
+        self.allData = ''
+        self.singleData = ''
+        self.signal = ''
+        Thread.__init__(self)
+    
+    def get_stu_by_edi_article_all(self, id, request, check):
+        self.allData = views.get_student_featured_article(id, request, check)
+        return
+    
+    def get_stu_by_edi_article_single(self, id, request, check):
+        self.singleData = views.get_student_featured_article(id, request, check)
+        return
+    
+    def get_stu_by_edi_article_delete(self, id, request, check):
+        self.signal = views.get_student_featured_article(id, request, check)
+        return
+        
+
+    # def get_stu_by_edi_update_th(self, id, request):
+    #     data = request.data
+    #     try:
+            
+    #         return True
+    #     except:
+    #         return False
 ##=========================================== Api View Class ====================================================##
 class StudentArticleAdminViewSet(viewsets.ViewSet):
     # permission_classes = [IsAdminUser]
@@ -234,6 +286,16 @@ class StudentArticleAdminViewSet(viewsets.ViewSet):
             return Response(status.HTTP_201_CREATED)
         else:
             return Response(status.HTTP_208_ALREADY_REPORTED)
+        
+    def update(self, request, pk=None):
+        classOj = PostStudentArticle(request)
+        cr = Thread(target=classOj.update_th, args=(pk, request))
+        cr.start()
+        cr.join()
+        if classOj.signal == True:
+            return Response(status.HTTP_201_CREATED)
+        else:
+            return Response(status.HTTP_304_NOT_MODIFIED)
 
     def retrieve(self, request, pk=None):
         classOj = PostStudentArticle(request)
@@ -347,6 +409,43 @@ class CounsellorAdminViewSet(viewsets.ViewSet):
         if classOj.signal == True:
             return Response(status.HTTP_200_OK)
 
+class StudentArticleEditoryByAdminViewSet(viewsets.ViewSet):
+    # permission_classes = [IsAdminUser]
+    # authentication_classes=[JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def list(self, request):
+        classOj = PostStudentArticle(request)
+        st = Thread(target=classOj.all_data_th_edi_by)
+        st.start()
+        st.join()
+        return Response(classOj.allData)
+        
+    def update(self, request, pk=None):
+        classOj = PostStudentArticle(request)
+        cr = Thread(target=classOj.update_th_edi_bye, args=(pk, request))
+        cr.start()
+        cr.join()
+        if classOj.signal == True:
+            return Response(status.HTTP_201_CREATED)
+        else:
+            return Response(status.HTTP_304_NOT_MODIFIED)
+
+    def retrieve(self, request, pk=None):
+        classOj = PostStudentArticle(request)
+        sdt = Thread(target=classOj.single_data_th, args=(pk,))
+        sdt.start()
+        sdt.join()
+        return Response(classOj.singleData)
+    
+    def destroy(self, request, pk=None):
+        classOj = PostStudentArticle(request)
+        sdt = Thread(target=classOj.delete_data_th, args=(pk,))
+        sdt.start()
+        sdt.join()
+        if classOj.signal == True:
+            return Response(status.HTTP_200_OK)
+
 
 @permission_classes([IsAuthenticated])
 # @authentication_classes([JWTAuthentication])
@@ -360,7 +459,6 @@ def get_get_carrer_adminView(request):
     def th(id, check):
         global data
         data = views.get_carrer(id, check)
-        return
     t = Thread(target=th, args=(id, check))
     t.start()
     t.join()

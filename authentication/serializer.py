@@ -1,3 +1,4 @@
+from pyexpat import model
 from django.db.models import fields
 from rest_framework import serializers
 from django.contrib.auth.models import User
@@ -33,6 +34,16 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = ['id', 'user', 'className','userPic']
 
+class userCustomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email','last_name']
+
+class UserSerializerWithProfile(userCustomSerializer):
+    profile = UserProfileSerializer(many=False, read_only=True)
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email','last_name', 'profile']
 
 ##=============================== User Serializer With Token ==================================##
 class UserSerializerWithToken(UserSerializer):
@@ -45,6 +56,8 @@ class UserSerializerWithToken(UserSerializer):
     def get_token(self, obj):
         token = RefreshToken.for_user(obj)
         return str(token.access_token)
+
+
 ##=============================== End... ==================================##
 
 
