@@ -197,6 +197,7 @@ class BookUserSlot(models.Model):
 class BookSlotPaymentHistory(models.Model):
     user = models.ForeignKey(User,on_delete=CASCADE,max_length=400, null=True, blank=True)
     slotBook = models.ForeignKey(BookUserSlot,on_delete=CASCADE,max_length=400, null=True, blank=True)                   
+    counsId = models.CharField(max_length=400, null=True, blank=True)
     ORDER_ID = models.CharField(max_length=400, null=True, blank=True)
     TXN_AMOUNT = models.CharField(max_length=400, null=True, blank=True)
     email = models.CharField(max_length=400, null=True, blank=True)
@@ -212,4 +213,6 @@ class BookSlotPaymentHistory(models.Model):
     createAt = models.DateTimeField(null=True, blank=True, auto_now_add=True)
 
     def __str__(self):
-        return str(f"{self.user} - {self.slotBook}" )
+        return str(f"{self.user} - {self.slotBook}")
+
+

@@ -51,7 +51,10 @@ class Title(models.Model):
     
 
 class Section(models.Model):
-    section = models.CharField(max_length=400, null=True, blank=True)
+    section = models.CharField(max_length=400, null=True, blank=True) 
+    sectionInterest = models.CharField(max_length=400, null=True, blank=True) 
+    duration = models.CharField(max_length=200,null=True, blank=True)
+    number = models.FloatField(null=True, blank=True)
     class Meta:
         verbose_name_plural = "Add Section"
     def __str__(self):
@@ -81,11 +84,12 @@ class ShowGrade(models.Model):
                 json = i.the_json
                 the_json = json
                 the_json[str(self.selectGrade)] = self.score
-            ShowGrade.objects.filter(id = i.id).update(the_json = the_json)
+            ShowGrade.objects.filter(id = i.id).update(the_json = the_json, score = '')
             return ShowGrade
         else:
             the_json[str(self.selectGrade)] = self.score
             self.the_json = the_json
+            self.score = ''
             super(ShowGrade, self).save(*args, **kwargs)
     def __str__(self):
         return str(f"{self.className} - {self.classSection} - {self.section}")
@@ -117,13 +121,17 @@ class Interpretation(models.Model):
             except:
                 the_json[str(self.selectGrade)] = self.point
                 the_title[str(self.selectGrade)] = self.title
+                self.point = ''
+                self.title = ''
             Interpretation.objects.filter(id = i.id).update(the_json = the_json, the_title = the_title)
-            return Interpretation
+            return 
         else:
             the_json[str(self.selectGrade)] = self.point
             the_title[str(self.selectGrade)] = self.title
             self.the_json = the_json
             self.the_title = the_title
+            self.point = ''
+            self.title = ''
             super(Interpretation, self).save(*args, **kwargs)
     def __str__(self):
         return str(f"{self.className} - {self.classSection}")
@@ -155,34 +163,58 @@ class SelectNumber(models.Model):
     def __str__(self):
         return str(f"{self.className} - {self.classSection}")
 
-
+RIGHT_ANS_CHOICES =(
+    ("A", "A"),
+    ("AText", "AText"),
+    ("B", "B"),
+    ("BText", "BText"),
+    ("C", "C"),
+    ("CText", "CText"),
+    ("D", "D"),
+    ("DText", "DText"),
+    ("E", "E"),
+    ("EText", "EText"),
+)
 
 class ImageOptionsTest(models.Model):
     section = models.ForeignKey(Section,on_delete=CASCADE,max_length=400, null=True, blank=True)
     questionText = models.TextField(null=True, blank=True)
     question= models.ImageField(upload_to = 'Image-Test', null=True, blank=True, max_length=200)
     a = models.ImageField(upload_to = 'Image-Test', null=True, blank=True, max_length=200)
-    aText = models.CharField(null=True, blank=True, max_length=400)
+    aText = models.TextField(null=True, blank=True)
     b = models.ImageField(upload_to = 'Image-Test', null=True, blank=True, max_length=200)
-    bText = models.CharField(null=True, blank=True, max_length=400)
+    bText = models.TextField(null=True, blank=True)
     c = models.ImageField(upload_to = 'Image-Test', null=True, blank=True, max_length=200)
-    cText = models.CharField(null=True, blank=True, max_length=400)
+    cText = models.TextField(null=True, blank=True)
     d = models.ImageField(upload_to = 'Image-Test', null=True, blank=True, max_length=200)
-    dText = models.CharField(null=True, blank=True, max_length=400)
+    dText = models.TextField(null=True, blank=True)
     e = models.ImageField(upload_to = 'Image-Test', null=True, blank=True, max_length=200)
-    eText = models.CharField(null=True, blank=True, max_length=400)
+    eText = models.TextField(null=True, blank=True)
+    choiceRightAns = models.CharField(choices = RIGHT_ANS_CHOICES,null=True, blank=True, max_length=300)
     rightAns = models.CharField(null=True, blank=True, max_length=300)
     class Meta:
-        verbose_name_plural = "Add Image Type Test"
+        verbose_name_plural = "Image Test"
     def save(self, *args, **kwargs):
-        if self.rightAns == 'a':
-            self.rightAns = self.a
-        elif self.rightAns == 'b':
-            self.rightAns = self.b
-        elif self.rightAns == 'c':
-            self.rightAns = self.c
-        elif self.rightAns == 'd':
-            self.rightAns = self.d
+        if self.choiceRightAns == 'A':
+            self.rightAns = f"/media/{self.a}" 
+        elif self.choiceRightAns == 'AText':
+            self.rightAns = self.aText
+        elif self.choiceRightAns == 'B':
+            self.rightAns = f"/media/{self.b}" 
+        elif self.choiceRightAns == 'BText':
+            self.rightAns = self.bText
+        elif self.choiceRightAns == 'C':
+            self.rightAns = f"/media/{self.c}" 
+        elif self.choiceRightAns == 'CText':
+            self.rightAns = self.cText
+        elif self.choiceRightAns == 'D':
+            self.rightAns = f"/media/{self.d}" 
+        elif self.choiceRightAns == 'DText':
+            self.rightAns = self.dText
+        elif self.choiceRightAns == 'E':
+            self.rightAns = f"/media/{self.e}" 
+        elif self.choiceRightAns == 'EText':
+            self.rightAns = self.eText
         super(ImageOptionsTest, self).save(*args, **kwargs)
     def __str__(self):
         return str(self.section)
@@ -196,18 +228,21 @@ class OneOptionsTest(models.Model):
     b = models.CharField(max_length=400, null=True, blank=True)
     c = models.CharField(max_length=400, null=True, blank=True)
     d = models.CharField(max_length=400, null=True, blank=True)
+    choiceRightAns = models.CharField(choices = RIGHT_ANS_CHOICES,null=True, blank=True, max_length=300)
     rightAns = models.CharField(null=True, blank=True, max_length=300)
     class Meta:
         verbose_name_plural = "Add Single Marking Type Test"
     def save(self, *args, **kwargs):
-        if self.rightAns == 'a':
+        if self.choiceRightAns == 'A':
             self.rightAns = self.a
-        elif self.rightAns == 'b':
+        elif self.choiceRightAns == 'B':
             self.rightAns = self.b
-        elif self.rightAns == 'c':
+        elif self.choiceRightAns == 'C':
             self.rightAns = self.c
-        elif self.rightAns == 'd':
+        elif self.choiceRightAns == 'D':
             self.rightAns = self.d
+        elif self.choiceRightAns == 'E':
+            self.rightAns = self.e
         super(OneOptionsTest, self).save(*args, **kwargs)
     def __str__(self):
         return str(self.section)
@@ -310,6 +345,7 @@ class Reports(models.Model):
     Class = models.CharField(null=True, blank=True, max_length=200)
     classSection = models.CharField(max_length=400, null=True, blank=True)                    
     section = models.CharField(null=True, blank=True, max_length=200)
+    sectionInterest = models.CharField(max_length=400, null=True, blank=True)
     # question = models.CharField(null=True, blank=True, max_length=200)
     interpretatio = models.ForeignKey(Interpretation,on_delete=CASCADE, max_length=500, null=True, blank=True)
     grade = models.CharField(null=True, blank=True, max_length=100)

@@ -11,29 +11,34 @@ from django.contrib.admin import AdminSite, sites
 
 
 # @admin.register(SelectAcademic)
-# class SelectAcademicModelAdmin(admin.ModelAdmin):
+# class SelectAcademicModelAdmin(admin.ModelAdmin): 
 #     list_display = ['id', 'classOrCollage']
 
-# @admin.register(NewClass)
-# class NewClassModelAdmin(admin.ModelAdmin):
-#     list_display = ['id','newClass', 'classOrCollage']
+@admin.register(NewClass)
+class NewClassModelAdmin(admin.ModelAdmin):
+    list_display = ['id','newClass', 'classOrCollage']
 
 # @admin.register(Career)
 # class CareerModelAdmin(admin.ModelAdmin):
 #     list_display = ['newCareer']
 
-# @admin.register(AddClassSection)
-# class AddClassSectionModelAdmin(admin.ModelAdmin):
-#     list_display = ['classSection']
+@admin.register(AddClassSection)
+class AddClassSectionModelAdmin(admin.ModelAdmin):
+    list_display = ['classSection']
 
-# @admin.register(Section)
-# class SectionModelAdmin(admin.ModelAdmin):
-#     list_display = ['id', 'section']
+@admin.register(Section)
+class SectionModelAdmin(admin.ModelAdmin):
+    list_display = ['id', 'section', 'sectionInterest', 'number', 'duration']
 
-
-# @admin.register(ImageOptionsTest)
-# class ImageOptionsTestModelAdmin(admin.ModelAdmin):
-#     list_display = ['section', 'question', 'questionText', 'a','aText', 'b','bText', 'c', 'cText', 'd', 'dText', 'rightAns']
+@admin.register(ImageOptionsTest)
+class ImageOptionsTestModelAdmin(admin.ModelAdmin):
+    list_display = [
+        'section', 'questionText', 'aText', 'bText', 'cText', 'dText', 'eText',
+        'question', 'a', 'b', 'c', 'd', 'e', 'rightAns'
+        ]
+    
+    
+    # list_display = ['section', 'question', 'questionText', 'a','aText', 'b','bText', 'c', 'cText', 'd', 'dText', 'rightAns']
 
 
 # @admin.register(OneOptionsTest)
@@ -65,51 +70,51 @@ from django.contrib.admin import AdminSite, sites
 #     list_display = ['id', 'grade']
 
 
-# @admin.register(ShowGrade)
-# class ShowGradeModelAdmin(admin.ModelAdmin):
-#     list_display = ['className', 'classSection', 'section', 'the_json']
+@admin.register(ShowGrade)
+class ShowGradeModelAdmin(admin.ModelAdmin):
+    list_display = ['className', 'classSection', 'section', 'the_json']
 
 
-# @admin.register(Interpretation)
-# class InterpretationModelAdmin(admin.ModelAdmin):
-#     list_display = ['className', 'classSection', 'section', 'title','grade', 'selectGrade', 'point', 'the_json', 'the_title']
+@admin.register(Interpretation)
+class InterpretationModelAdmin(admin.ModelAdmin):
+    list_display = ['className', 'classSection', 'section', 'title','grade', 'selectGrade', 'point', 'the_json', 'the_title']
 
 
-# @admin.register(SelectNumber)
-# class SelectNumberModelAdmin(admin.ModelAdmin):
-#     list_display = ['className', 'classSection', 'a', 'b', 'c', 'd', 'e', 'rightAns']
+@admin.register(SelectNumber)
+class SelectNumberModelAdmin(admin.ModelAdmin):
+    list_display = ['className', 'classSection', 'a', 'b', 'c', 'd', 'e', 'rightAns']
 
 
-# @admin.register(Title)
-# class TitleModelAdmin(admin.ModelAdmin):
-#     list_display = ['className', 'classSection', 'description', 'duration', 'price']
+@admin.register(Title)
+class TitleModelAdmin(admin.ModelAdmin):
+    list_display = ['className', 'classSection', 'description', 'duration', 'price']
 
 
-# @admin.register(ResultTitle)
-# class ResultTitleModelAdmin(admin.ModelAdmin):
-#     list_display = ['typeOfTest', 'className', 'classSection', 'mainHeading', 'title', 'discription', 'point', 'the_json']
+@admin.register(ResultTitle)
+class ResultTitleModelAdmin(admin.ModelAdmin):
+    list_display = ['typeOfTest', 'className', 'classSection', 'mainHeading', 'title', 'discription', 'point', 'the_json']
 
 
-# @admin.register(AddTest)
-# class AddTestModelAdmin(admin.ModelAdmin):
-#     list_display = ['className', 'classSection', 'typeOfTest', 'title', 'selectNumber', 'resultTitle', 'createAt']
+@admin.register(AddTest)
+class AddTestModelAdmin(admin.ModelAdmin):
+    list_display = ['className', 'classSection', 'typeOfTest', 'title', 'selectNumber', 'resultTitle', 'createAt']
 
 
-# @admin.register(Reports)
-# class ReportsModelAdmin(admin.ModelAdmin):
-#     list_display = ['id','user', 'Class', 'classSection', 'carrer', 'section', 'interpretatio', 'grade', 'totalCount', 'typeOftest', 'totalNoQu']
+@admin.register(Reports)
+class ReportsModelAdmin(admin.ModelAdmin):
+    list_display = ['id','user', 'Class', 'classSection', 'sectionInterest', 'carrer', 'section', 'interpretatio', 'grade', 'totalCount', 'typeOftest', 'totalNoQu']
 
-# @admin.register(PaymentHistory)
-# class PaymentHistoryModelAdmin(admin.ModelAdmin):
-#     list_display = ['user', 'typeOfTest', 'classSection', 'Class', 'ORDER_ID', 'TXN_AMOUNT', 'email', 'status', 'gateway', 'bankname', 'TXNID', 'TXNDATE', 'paymentCount', 'CURRENCY', 'PAYMENTMODE', 'MID', 'RESPCODE']
+@admin.register(PaymentHistory)
+class PaymentHistoryModelAdmin(admin.ModelAdmin):
+    list_display = ['user', 'typeOfTest', 'classSection', 'Class', 'ORDER_ID', 'TXN_AMOUNT', 'email', 'status', 'gateway', 'bankname', 'TXNID', 'TXNDATE', 'paymentCount', 'CURRENCY', 'PAYMENTMODE', 'MID', 'RESPCODE']
 
 # @admin.register(TestBackupOneQuizeCorrect)
 # class TestBackupOneQuizeCorrectModelAdmin(admin.ModelAdmin):
 #     list_display = ['user', 'typeOfTest', 'className', 'classSection', 'oneQuizeCorrect', 'testDiscription', 'userClickObj', 'lastTime', 'number']
 
-# @admin.register(TestBackupOneImageQuizeCorrect)
-# class TestBackupOneImageQuizeCorrectModelAdmin(admin.ModelAdmin):
-#     list_display = ['user', 'typeOfTest', 'className', 'classSection', 'imageOneQuizeCorrect', 'testDiscription', 'userClickObj', 'lastTime', 'number']
+@admin.register(TestBackupOneImageQuizeCorrect)
+class TestBackupOneImageQuizeCorrectModelAdmin(admin.ModelAdmin):
+    list_display = ['user', 'typeOfTest', 'className', 'classSection', 'imageOneQuizeCorrect', 'testDiscription', 'userClickObj', 'lastTime', 'number']
 
 
 # @admin.register(TestBackupMultipalQuize)
@@ -128,24 +133,24 @@ from django.contrib.admin import AdminSite, sites
 
 
 
-# def get_app_list(self, request):
-#     """
-#     Return a sorted list of all the installed apps that have been
-#     registered in this site.
-#     """
-#     # Retrieve the original list
-#     app_dict = self._build_app_dict(request)
-#     app_list = sorted(app_dict.values(), key=lambda x: x['name'].lower())
+def get_app_list(self, request):
+    """
+    Return a sorted list of all the installed apps that have been
+    registered in this site.
+    """
+    # Retrieve the original list
+    app_dict = self._build_app_dict(request)
+    app_list = sorted(app_dict.values(), key=lambda x: x['name'].lower())
 
-#     # Sort the models customably within each app.
-#     for app in app_list:
-#         if app['app_label'] == 'auth':
-#             ordering = {
-#                 'Users': 1,
-#                 'Groups': 2
-#             }
-#             app['models'].sort(key=lambda x: ordering[x['name']])
+    # Sort the models customably within each app.
+    for app in app_list:
+        if app['app_label'] == 'auth':
+            ordering = {
+                'Users': 1,
+                'Groups': 2
+            }
+            app['models'].sort(key=lambda x: ordering[x['name']])
 
-#     return app_list
+    return app_list
 
-# admin.AdminSite.get_app_list = get_app_list
+admin.AdminSite.get_app_list = get_app_list

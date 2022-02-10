@@ -8,11 +8,11 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import viewsets
 import time
-
 from CareerManagementSystem.models import Carrer
 from CareerManagementSystem.models import EditorApproveArticle
+from CommanFunctions.paymentView import PaymentClass
 from .models import (
-    YouTubeVideo, VideoCarrer, VideoNoView, VideoRating
+    VideoPaymentHistory, YouTubeVideo, VideoCarrer, VideoNoView, VideoRating
 )
 
 from .serializer import (
@@ -27,6 +27,9 @@ videoCarrerSingleDataContext = {}
 videoCarrerIncViewContext = {}
 videoCarrerRatingContext = {}
 
+
+# student desbord
+desStuWiseVideoContext = {}
 
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
@@ -53,15 +56,38 @@ def get_video_carrer_func(id, request, check):
         return serializer.data
     
     if check == "singleData":
-        t = Thread(target=no_view_video, args=(request.user, id))
-        t.start()
-        t.join()
-        if id in videoCarrerSingleDataContext:
-            return videoCarrerSingleDataContext[id]
-        obj = VideoCarrer.objects.get(id = id)
-        serializer = VideoCarrerSerializer(obj, many=False)
-        videoCarrerSingleDataContext[id] = serializer.data
-        return serializer.data
+        if id in videoCarrerIdContext:
+            obj = videoCarrerIdContext[id]
+        else:
+            obj = VideoCarrer.objects.get(id = id)
+            videoCarrerIdContext[id] = obj
+        if obj.earnings == "Paid":
+            classObj = PaymentClass()
+            pt = Thread(target=classObj.PaytemFunc, args=(2, obj, request, str(obj.price)))
+            pt.start()
+            pt.join()
+            payFuncObj = classObj.data
+            if payFuncObj != 308:
+                return payFuncObj
+            else:
+                t = Thread(target=no_view_video, args=(request.user, id))
+                t.start()
+                t.join()
+                if id in videoCarrerSingleDataContext:
+                    return videoCarrerSingleDataContext[id]
+                serializer = VideoCarrerSerializer(obj, many=False)
+                videoCarrerSingleDataContext[id] = serializer.data
+                return serializer.data
+        else:
+            t = Thread(target=no_view_video, args=(request.user, id))
+            t.start()
+            t.join()
+            if id in videoCarrerSingleDataContext:
+                return videoCarrerSingleDataContext[id]
+            serializer = VideoCarrerSerializer(obj, many=False)
+            videoCarrerSingleDataContext[id] = serializer.data
+            return serializer.data
+
 
     if check == "paginationSearch":
         query = request.query_params.get('keyword')
@@ -94,21 +120,24 @@ def get_video_carrer_func(id, request, check):
         return context
 
 
-
-    # if check == "incView":
-    #     incMent = 1
-    #     if id in videoCarrerIncViewContext:
-    #         incMent = videoCarrerIdContext[id] + 1
-    #         videoCarrerIdContext[id] = incMent
-    #     obj = VideoCarrer.objects.filter(id = id).update(noView = incMent)
-    #     videoCarrerIdContext[id] = obj.noView
-    #     return
-
     if check == "incView":
         obj = VideoCarrer.objects.get(id = id)
         obj.noView += 1
         obj.save()
         return
+
+
+def stu_wise_all_Video(request, check):
+    global desStuWiseVideoContext
+    if check == "desStuWiseVideo":
+        if request.user.id in desStuWiseVideoContext:
+            return desStuWiseVideoContext[request.user.id]
+        else:
+            getId = list(VideoPaymentHistory.objects.filter(user = request.user, RESPCODE = "01").values_list('video', flat=True))
+            obj = VideoCarrer.objects.filter(id__in=getId)
+            serializer = VideoCarrerSerializer(obj, many=True)
+            desStuWiseVideoContext[request.user.id] = serializer.data
+            return serializer.data
 
 
 def no_view_video(user, id):
@@ -199,7 +228,5 @@ def videoView(request, pk):
     else:
         videoSignal = ''
         return Response(status.HTTP_208_ALREADY_REPORTED)
-
-
 
 

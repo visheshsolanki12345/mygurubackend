@@ -297,31 +297,52 @@ def saveTestBackup(user, typeTest, Class, classSection, section, question, objec
             return True
 
     elif typeTest == imageTest:
-        qu = question.split("/media/")
-        que = ImageOptionsTest.objects.filter(section=sectionID, question=qu[1])
+        signal = ''
+        qu = question
+        try:
+            qu = question.split("/media/")[1]
+            que = ImageOptionsTest.objects.filter(section=sectionID, question=qu)
+            signal = 1
+        except:
+            if signal == '':
+                que = ImageOptionsTest.objects.filter(section=sectionID, questionText=question)
         for i in que:
-            upBackup = TestBackupOneImageQuizeCorrect.objects.filter(user = user ,className = classID, classSection = classSectionId, imageOneQuizeCorrect = i.id)
-            if upBackup:
-                upBackup.update(userClickObj = object)
+            try:
+                upBackup = TestBackupOneImageQuizeCorrect.objects.get(user = user ,className = classID, classSection = classSectionId, imageOneQuizeCorrect = i.id)
+            except:
+                op = TestBackupOneImageQuizeCorrect.objects.create(user = user, userClickObj = object)
+                TestBackupOneImageQuizeCorrect.objects.filter(id=op.id).update(
+                    typeOfTest = testID,
+                    className = classID,
+                    classSection = classSectionId, 
+                    imageOneQuizeCorrect = i.id,
+                    testDiscription = addTestID,
+                    lastTime = lastTime,
+                    number = mark,
+                    )
                 return True
-            op = TestBackupOneImageQuizeCorrect.objects.create(user = user, userClickObj = object)
-            TestBackupOneImageQuizeCorrect.objects.filter(id=op.id).update(
-                typeOfTest = testID,
-                className = classID,
-                classSection = classSectionId, 
-                imageOneQuizeCorrect = i.id,
-                testDiscription = addTestID,
-                lastTime = lastTime,
-                number = mark,
+            if upBackup:
+                TestBackupOneImageQuizeCorrect.objects.create(
+                    user = upBackup.user,
+                    typeOfTest = upBackup.typeOfTest,
+                    className = upBackup.className, 
+                    classSection = upBackup.classSection, 
+                    testDiscription = upBackup.testDiscription,
+                    imageOneQuizeCorrect = upBackup.imageOneQuizeCorrect,
+                    userClickObj = object, 
+                    number = mark, 
+                    lastTime = lastTime
                 )
-            return True
+                TestBackupOneImageQuizeCorrect.objects.filter(id = upBackup.id).delete()
+                return True
+            
 
     elif typeTest == allOption:
         que = OptionsTest.objects.filter(section=sectionID, question=question)
         for i in que:
-            upBackup = TestBackupMultipalQuize.objects.filter(user = user ,className = classID, classSection = classSectionId, multipalQuize = i.id, userClickObj=object)
+            upBackup = TestBackupMultipalQuize.objects.filter(user = user ,className = classID, classSection = classSectionId, multipalQuize = i.id)
             if upBackup:
-                upBackup.delete()
+                upBackup.update(userClickObj = object)
                 return True
             op = TestBackupMultipalQuize.objects.create(user = user, userClickObj = object)
             TestBackupMultipalQuize.objects.filter(id=op.id).update(
@@ -461,10 +482,14 @@ def resultGeneratorBackup(user, typeOfTest, Class, classSection):
     for i in setV:
         for j in mysite:
             if i == j.split('-')[0]:
-                var += int(j.split('-')[1])
+                if typeOfTest == imageTest:
+                    var += float(j.split('-')[1])
+                else:
+                    var += int(j.split('-')[1])
         context[str(i)] = var
         var = 0
     return context
+
 
 # @api_view(['GET'])
 # @authentication_classes([JWTAuthentication])
@@ -593,7 +618,7 @@ def findSectionResult(user, typeOfTest, Class, classSection):
         elif typeOfTest == oneOption:
             noSum = max(countNO) * toQuCount
         Reports.objects.create(
-            user = user, section = allSecId.section, totalCount = '0', totalNoQu = noSum,
+            user = user, section = allSecId.section, sectionInterest = allSecId.sectionInterest, totalCount = '0', totalNoQu = noSum,
             typeOftest = typeOfTest, classSection = classSection, Class = Class, grade = "Not Attempted"
         )
     return
@@ -1047,21 +1072,21 @@ def getResult(request):
     ss = Thread(target=getResultDelEtc.save_section)
     sr = Thread(target=getResultDelEtc.save_result)
     gr = Thread(target=getResultDelEtc.get_result)
-    pd = Thread(target=getResultDelEtc.payment_decriment)
+    # pd = Thread(target=getResultDelEtc.payment_decriment)
     db = Thread(target=getResultDelEtc.del_backup)
     dr = Thread(target=getResultDelEtc.del_result)
 
     ss.start()
     sr.start()
     gr.start()
-    pd.start()
+    # pd.start()
     db.start()
     dr.start()
 
     ss.join()
     sr.join()
     gr.join()
-    pd.join()
+    # pd.join()
     db.join()
     dr.join()
     # end = time.time()

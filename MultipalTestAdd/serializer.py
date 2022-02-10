@@ -31,7 +31,7 @@ class CareerSerializer(serializers.ModelSerializer):
 class SectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Section
-        fields = ['id', 'section']
+        fields = ['id', 'section', 'sectionInterest', 'number', 'duration']
 
 class InterpretationGradeSerializer(serializers.ModelSerializer):
     class Meta:

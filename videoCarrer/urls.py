@@ -2,10 +2,14 @@ from django.urls import path, include
 from videoCarrer import views
 from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
-
+from . import adminView
 
 router.register('video', views.VideoCarrerViewSet, basename="video")
 
+
+
+# AdminURl
+router.register('video-admin', adminView.VideoCarrerAdminViewSet, basename="video-admin")
 ##=============================== URL ===============================##
 urlpatterns = [
     path('', include(router.urls)),

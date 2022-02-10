@@ -44,6 +44,25 @@ class VideoCarrer(models.Model):
     def __str__(self):
         return str(self.carrer)
 
+class VideoPaymentHistory(models.Model):
+    user = models.ForeignKey(User,on_delete=CASCADE,max_length=400, null=True, blank=True)
+    video = models.ForeignKey(VideoCarrer,on_delete=CASCADE,max_length=400, null=True, blank=True)                   
+    ORDER_ID = models.CharField(max_length=400, null=True, blank=True)
+    TXN_AMOUNT = models.CharField(max_length=400, null=True, blank=True)
+    email = models.CharField(max_length=400, null=True, blank=True)
+    status = models.CharField(max_length=400, null=True, blank=True)
+    gateway = models.CharField(max_length=400, null=True, blank=True)
+    bankname = models.CharField(max_length=400, null=True, blank=True)
+    TXNID = models.CharField(max_length=400, null=True, blank=True)
+    TXNDATE = models.CharField(max_length=400, null=True, blank=True)
+    RESPCODE = models.CharField(max_length=400, null=True, blank=True)
+    CURRENCY = models.CharField(max_length=400, null=True, blank=True)
+    PAYMENTMODE = models.CharField(max_length=400, null=True, blank=True)
+    MID = models.CharField(max_length=400, null=True, blank=True)
+    createAt = models.DateTimeField(null=True, blank=True, auto_now_add=True)
+
+    def __str__(self):
+        return str(f"{self.user} - {self.video}" )
 
 class VideoRating(models.Model):
     user = models.ForeignKey(User, null=True, blank=True, on_delete=CASCADE)

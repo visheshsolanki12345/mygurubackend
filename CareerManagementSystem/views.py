@@ -1,3 +1,4 @@
+from urllib import request
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -10,10 +11,11 @@ from rest_framework.pagination import PageNumberPagination
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 import time
 import uuid
+from videoCarrer.views import stu_wise_all_Video
 from videoCarrer import views as videoViews
-from CommanFunctions.paymentView import PaytemFunc
+from CommanFunctions.paymentView import PaymentClass
 from .models import (
-    CarrerType, Carrer, CarrerPage, Counsellor, CounsellorNoView, CounsellorRating, StudentFeaturedArticle, EditorApproveArticle,
+    ArticlePaymentHistory, BookSlotPaymentHistory, CarrerType, Carrer, CarrerPage, Counsellor, CounsellorNoView, CounsellorRating, StudentFeaturedArticle, EditorApproveArticle,
     ArticleRating, ArticleNoView, CounsellorSlot, BookUserSlot
     )
 
@@ -52,6 +54,10 @@ counsellorHomeDataContext = {}
 
 counsollerSlotIdContext = {}
 
+# desboard
+desStuWiseArticleContext = {}
+desStuWiseSlotContext = {}
+stuDesSelfArticleContext = {}
 ##=========================================== One Function ====================================================##
 
 def get_carre_type(id, check):
@@ -129,6 +135,7 @@ def get_student_featured_article(id, request, check):
     global studentFeacherArticleIdContext
     global studentFeacherArticleSingleContext
     global studentFeacherArticleSearchByEditorContext
+    global stuDesSelfArticleContext
 
     if check == "id":
         if id in studentFeacherArticleIdContext:
@@ -138,24 +145,13 @@ def get_student_featured_article(id, request, check):
         return obj.id
 
     if check == "userWise":
+        if request.user.id in stuDesSelfArticleContext:
+            return stuDesSelfArticleContext[request.user.id]
         obj = StudentFeaturedArticle.objects.filter(user = request.user).order_by('-id')
-        page = request.query_params.get('page')
-        paginator = Paginator(obj,10)
-
-        try:
-            obj = paginator.page(page)
-        except PageNotAnInteger:
-            obj = paginator.page(1)
-        except EmptyPage:
-            obj = paginator.page(paginator.num_pages)
-
-        if page == None:
-            page = 1
-
-        page = int(page)
         serializer = StudentFeaturedArticleSerializer(obj, many=True)
-        context = {'editorArticle': serializer.data, 'page': page, 'pages': paginator.num_pages}
-        return context
+        stuDesSelfArticleContext[request.user.id]  = serializer.data
+        return serializer.data
+
 
     if check == "editorBye":
         query = request.query_params.get('keyword')
@@ -226,6 +222,7 @@ def get_editor_approve_article(id, request, check):
     global stuArticlesingleDataUWContext
     global editorsingleDataUWContext
     global carrerIdContext
+    global desStuWiseArticleContext
 
     if check == "id":
         if id in editorFeacherArticleIdContext:
@@ -250,8 +247,22 @@ def get_editor_approve_article(id, request, check):
             obj = EditorApproveArticle.objects.get(id = id)
             editorFeacherArticleIdContext[id] = obj
         if obj.paymentChoices == "Paid":
-            payFuncObj = PaytemFunc(1, obj, request.user, str(uuid.uuid4()), str(obj.ammount), request.user.email)
-            return Response(payFuncObj)
+            classObj = PaymentClass()
+            pt = Thread(target=classObj.PaytemFunc, args=(1, obj, request, str(obj.ammount)))
+            pt.start()
+            pt.join()
+            payFuncObj = classObj.data
+            if payFuncObj != 308:
+                return payFuncObj
+            else:
+                t = Thread(target=no_view_article, args=(request.user, id))
+                t.start()
+                t.join()
+                if id in editorFeacherArticleSingleContext:
+                    return editorFeacherArticleSingleContext[id]
+                serializer = EditorApproveArticleSerializer(obj, many=False)
+                editorFeacherArticleSingleContext[id] = serializer.data
+                return serializer.data
         else:
             t = Thread(target=no_view_article, args=(request.user, id))
             t.start()
@@ -326,6 +337,30 @@ def get_editor_approve_article(id, request, check):
             del editorFeacherArticleSingleContext[id] 
         EditorApproveArticle.objects.filter(id = id).delete()
         return True
+    
+
+    if check == "desStuWiseArticle":
+        if request.user.id in desStuWiseArticleContext:
+            return desStuWiseArticleContext[request.user.id]
+        else:
+            getId = list(ArticlePaymentHistory.objects.filter(user = request.user, RESPCODE = "01").values_list('article', flat=True))
+            obj = EditorApproveArticle.objects.filter(id__in=getId)
+            serializer = EditorApproveArticleSerializer(obj, many=True)
+            desStuWiseArticleContext[request.user.id] = serializer.data
+            return serializer.data
+        
+
+def stu_wise_all_slot(request, check):
+    global desStuWiseSlotContext
+    if check == "desStuWiseSlot":
+        if request.user.id in desStuWiseSlotContext:
+            return desStuWiseSlotContext[request.user.id]
+        else:
+            getId = list(BookSlotPaymentHistory.objects.filter(user = request.user, RESPCODE = "01").values_list('slotBook', flat=True))
+            obj = BookUserSlot.objects.filter(id__in=getId)
+            serializer = BookUserSlotSerializer(obj, many=True)
+            desStuWiseSlotContext[request.user.id] = serializer.data
+            return serializer.data
 
 
 def get_counsellor(id, request, check):
@@ -458,7 +493,22 @@ def no_view_article(user, pk):
         obj.noView = totalView
         obj.save()
         return
-       
+
+
+def booking_th(user, obj):
+    l = RLock()
+    l.acquire(blocking=True)
+    try:
+        BookUserSlot.objects.create(
+            user = user,
+            counsellorSlot = obj,
+        )
+        l.release()
+        return True
+    except:
+        l.release()
+        return False
+
 ##=========================================== Thread Class ====================================================##
 class GetCarrerPage:
     def __init__(self):
@@ -515,10 +565,12 @@ class EditorGet:
         self.singleData = get_editor_approve_article(id, request, check)
         return
 
+
 class ShowSlot:
     def __init__(self):
         self.allData = ''
         self.slotBookingSignal = ''
+        self.payment = ''
         Thread.__init__(self)
 
     def show_slot_th(self, user, id):
@@ -533,28 +585,43 @@ class ShowSlot:
         self.allData = serializer.data
         return
 
-    def booking_th(self, user, id):
-        l = RLock()
-        l.acquire(blocking=True)
+    def booking_pay(self, request, id):
         global counsollerSlotIdContext
-        try:
-            if id in counsollerSlotIdContext:
-                obj = counsollerSlotIdContext[id]
-            else:
-                obj = CounsellorSlot.objects.get(id = id)
-                counsollerSlotIdContext[id] = obj
-            BookUserSlot.objects.create(
-                user = user,
-                counsellorSlot = obj,
-            )
-            self.slotBookingSignal = True
-            l.release()
-            return
-        except:
-            self.slotBookingSignal = False
-            l.release()
+        if id in counsollerSlotIdContext:
+            obj = counsollerSlotIdContext[id]
+        else:
+            obj = CounsellorSlot.objects.get(id = id)
+            counsollerSlotIdContext[id] = obj
+        classObj = PaymentClass()
+        pt = Thread(target=classObj.PaytemFunc, args=(3, obj, request, str(obj.counsellor.price)))
+        pt.start()
+        pt.join()
+        if classObj.data != 402:
+            self.payment = classObj.data
             return 
+        self.payment == 402
+        return
+        
+class StudentDeshBordView:
+    def __init__(self):
+        self.allData = {}
+        Thread.__init__(self)
 
+    def get_edi_article_th(self, id, request, check):
+        article = get_editor_approve_article(id, request, check)
+        self.allData['article'] = article
+
+    def get_edi_video_th(self, request, check):
+        video = stu_wise_all_Video(request, check)
+        self.allData['video'] = video
+
+    def get_edi_slot_th(self, request, check):
+        slot = stu_wise_all_slot(request, check)
+        self.allData['slot'] = slot
+
+    def get_stu_article_th(self, id, request, check):
+        stuArticle = get_student_featured_article(id, request, check)
+        self.allData['stuArticle'] = stuArticle
 
 ##=========================================== Api View Func ====================================================##
 @permission_classes([IsAuthenticated])
@@ -628,15 +695,15 @@ class EditorViewSet(viewsets.ViewSet):
         return Response(classOj.singleData)
 
 
-@api_view(['GET'])
-@authentication_classes([JWTAuthentication])
+# @api_view(['GET'])
+# @authentication_classes([JWTAuthentication])
 # @permission_classes([IsAuthenticated])
-def getAllArticle(request):
-    classOj = EditorGet()
-    ct = Thread(target=classOj.all_data_th, args=("null", request, "paginationSearch"))
-    ct.start()
-    ct.join()
-    return Response(classOj.allData)
+# def getAllArticle(request):
+#     classOj = EditorGet()
+#     ct = Thread(target=classOj.all_data_th, args=("null", request, "paginationSearch"))
+#     ct.start()
+#     ct.join()
+#     return Response(classOj.allData)
 
 
 signal = ''
@@ -727,9 +794,34 @@ def slotBooking(request, pk):
         return Response(classObj.allData)
     if request.method == "POST":
         classObj = ShowSlot()
-        t = Thread(target=classObj.booking_th, args=(user, pk))
+        t = Thread(target=classObj.booking_pay, args=(request, pk))
         t.start()
         t.join()
-        if classObj.slotBookingSignal == True:
-            return Response(status.HTTP_200_OK)
+        if classObj.payment != 402:
+            return Response(classObj.payment)
         return Response(status.HTTP_406_NOT_ACCEPTABLE)
+
+    
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def studentDeshBord(request):
+    classObj = StudentDeshBordView()
+    ea = Thread(target=classObj.get_edi_article_th, args=("null", request, "desStuWiseArticle"))
+    sv = Thread(target=classObj.get_edi_video_th, args=(request, "desStuWiseVideo"))
+    ss = Thread(target=classObj.get_edi_slot_th, args=(request, "desStuWiseSlot"))
+    sa = Thread(target=classObj.get_stu_article_th, args=("null", request, "userWise"))
+
+    ea.start()
+    sv.start()
+    ss.start()
+    sa.start()
+    
+    ea.join()
+    sv.join()
+    ss.join()
+    sa.join()
+    return Response(classObj.allData)
+    
+        

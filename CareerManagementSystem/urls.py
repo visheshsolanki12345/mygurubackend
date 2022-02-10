@@ -20,11 +20,16 @@ urlpatterns = [
     path('get-carrer-page/<str:id>/', views.getCarrerPage, name="get-carrer-page"),
     path('article-rating/<str:pk>/', views.articleRating, name="article-rating"),
     path('counsellor-rating/<str:pk>/', views.counsellorRating, name="counsellor-rating"),
-    path('get-all-article/', views.getAllArticle, name="article-rating"),
+    # path('get-all-article/', views.getAllArticle, name="get-all-article"),
     path('slot-booking/<str:pk>/', views.slotBooking, name="slot-booking"),
+    path('student-deshbord/', views.studentDeshBord, name="student-deshbord"),
 
     # Admin URL
     path('get-carrer-list/', AdminView.get_get_carrer_adminView, name="get-carrer-list"),
+
+
+
+    # path('self/', views.test, name="self"),
 
 ]
 

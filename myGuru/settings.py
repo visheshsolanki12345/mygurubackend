@@ -12,6 +12,7 @@ ALLOWED_HOSTS = ["*"]
 
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -27,6 +28,7 @@ INSTALLED_APPS = [
     'MultipalTestAdd',
     'CareerManagementSystem',
     'CommanFunctions',
+    # 'InterestTest',
     
 ]
 
@@ -90,17 +92,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'byjwopzfrkw3o3ap3h7v',               
-#         'USER': 'uactfthueaygxclp',
-#         'PASSWORD': 'G1fxhfwHtKdlhe7mougz',
-#         'HOST': 'byjwopzfrkw3o3ap3h7v-mysql.services.clever-cloud.com',   # Use this if Database exists in your PC or replace it by IP address of PC where you are fetching the Database
-#         'PORT': '3306',     
-#     },
-# }
 
 # DATABASES = {
 #     'default': {
@@ -220,3 +211,59 @@ LOGIN_REDIRECT_URL = '/profile/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
+JAZZMIN_SETTINGS = {
+    # title of the window (Will default to current_admin_site.site_title if absent or None)
+    "site_title": "My Guru",
+    "site_header": "My Guru",
+    "site_logo": "CommanFunctions/images/logo.png",
+    "site_logo_classes": "img-circle",
+    "welcome_sign": "Welcome to the My Guru",
+    "copyright": "myGuru Pvt Ltd",
+    "search_model": "auth.User",
+    "VideoCarrer_avatar": "CommanFunctions/images/act1.png",
+
+    "topmenu_links": [
+
+        # Url that gets reversed (Permissions can be added)
+        {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
+
+        # external url that opens in a new window (Permissions can be added)
+        {"name": "Support", "url": "https://github.com/farridav/django-jazzmin/issues", "new_window": True},
+
+        # model admin to link to (Permissions checked against model)
+        {"model": "auth.User"},
+
+        # App with dropdown menu to all its models pages (Permissions checked against models)
+        {"app": "videoCarrer"}
+    ],
+    "usermenu_links": [
+        {"name": "Support", "url": "https://github.com/farridav/django-jazzmin/issues", "new_window": True},
+        {"model": "auth.user"} ##==> not showr
+    ],
+    "show_sidebar": True,
+    "navigation_expanded": True,
+
+    "hide_apps": ["Auth Token", "Django_Rest_Passwordreset"],
+    "hide_models": [
+        "Videocarrer.VideoRating", "Videocarrer.VideoNoView", 
+        "Videocarrer.YouTubeVideo", "auth.Group", "authtoken.Tokens"
+        ],
+    "order_with_respect_to": ["auth", "Videocarrer",],
+
+    # "custom_links": {
+    #     "videoCarrer": [{
+    #         "name": "This Video Carrer", 
+    #         "url": "make_messages", 
+    #         "icon": "fas fa-comments",
+    #         "permissions": ["videoCarrer.VideoCarrer"]
+    #     }]
+    # },
+
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "videoCarrer": "fas fa-user",
+        "videoCarrer.VideoCarrer": "fas fa-video",
+    },
+     "related_modal_active": False,
+}

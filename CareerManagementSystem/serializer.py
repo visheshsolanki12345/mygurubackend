@@ -68,7 +68,7 @@ class CounsellorSlotSerializer(serializers.ModelSerializer):
 
 
 class BookUserSlotSerializer(serializers.ModelSerializer):
-    counsellorSlot = CounsellorSerializer(many=False, read_only=True)
+    counsellorSlot = CounsellorSlotSerializer(many=False, read_only=True)
     class Meta:
         model = BookUserSlot
         fields = ['id', 'user', 'counsellorSlot']
