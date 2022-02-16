@@ -4,21 +4,21 @@ from .models import (
 )
 
 # Register your models here.
-@admin.register(YouTubeVideo)
-class YouTubeVideoModelAdmin(admin.ModelAdmin):
-    list_display = ['id','videoLink', 'videoTitle', 'description', 'createAt']
+# @admin.register(YouTubeVideo)
+# class YouTubeVideoModelAdmin(admin.ModelAdmin):
+#     list_display = ['id','videoLink', 'videoTitle', 'description', 'createAt']
 
 
 @admin.register(VideoCarrer)
 class VideoCarrerAdmin(admin.ModelAdmin):
-    list_display = ['id','user', 'carrer', 'title', 'sortDescription', 'thumbnailImage', 'embedUrl', 'earnings', 'price', 'rating', 'noView', 'createAt']
+    list_display = ['user', 'carrer', 'title', 'sortDescription', 'thumbnailImage', 'embedUrl', 'earnings', 'price', 'hide', 'rating', 'noView', 'createAt']
+    
+
+# @admin.register(VideoRating)
+# class VideoRatingAdmin(admin.ModelAdmin):
+#     list_display = ['user', 'videoCarrer', 'rating']
 
 
-@admin.register(VideoRating)
-class VideoRatingAdmin(admin.ModelAdmin):
-    list_display = ['user', 'videoCarrer', 'rating']
-
-
-@admin.register(VideoNoView)
-class ArticleNoViewAdmin(admin.ModelAdmin):
-    list_display = ['user', 'videoCarrer', 'noView']
+# @admin.register(VideoNoView)
+# class ArticleNoViewAdmin(admin.ModelAdmin):
+#     list_display = ['user', 'videoCarrer', 'noView']

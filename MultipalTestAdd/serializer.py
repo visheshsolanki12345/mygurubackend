@@ -4,7 +4,7 @@ from .models import (
     NewClass, ResultTitle, SelectAcademic, ShowGrade, Section, Interpretation, TestBackupFiveQuize, TestBackupMultipalQuize, TestBackupOneQuizeCorrect, TestBackupThreeQuize, Title,
      ImageOptionsTest, OneOptionsTest,
     OptionsTest, AddTest, TestCategory, ThreeOptionsTest, FiveOptionsTest, SelectNumber,
-    Reports, InterpretationGrade, Career, AddClassSection
+    Reports, InterpretationGrade, Career, AddClassSection, SectionInterest, CarrerDescription
     )
 
 class SelectAcademicSerializer(serializers.ModelSerializer):
@@ -32,6 +32,11 @@ class SectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Section
         fields = ['id', 'section', 'sectionInterest', 'number', 'duration']
+
+class SectionInterestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SectionInterest
+        fields = ['sectionInterest']
 
 class InterpretationGradeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -96,6 +101,13 @@ class ThreeOptionsTestSerializer(serializers.ModelSerializer):
     class Meta:
         model = ThreeOptionsTest
         fields = ['id', 'section', 'question', 'a', 'b', 'c']
+
+class CarrerDescriptionSerializer(serializers.ModelSerializer):
+    carrer = CareerSerializer(many=False, read_only=True)
+    section = SectionSerializer(many=False, read_only=True)
+    class Meta:
+        model = CarrerDescription
+        fields = ['id', 'carrer', 'section','description' ]
 
 class FiveOptionsTestSerializer(serializers.ModelSerializer):
     section = SectionSerializer(many=False, read_only=True)

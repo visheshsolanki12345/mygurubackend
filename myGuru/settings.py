@@ -27,9 +27,7 @@ INSTALLED_APPS = [
     'videoCarrer',
     'MultipalTestAdd',
     'CareerManagementSystem',
-    'CommanFunctions',
-    # 'InterestTest',
-    
+    'CommanFunctions',   
 ]
 
 
@@ -228,7 +226,7 @@ JAZZMIN_SETTINGS = {
         {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
 
         # external url that opens in a new window (Permissions can be added)
-        {"name": "Support", "url": "https://github.com/farridav/django-jazzmin/issues", "new_window": True},
+        {"name": "My Guru site", "url": "https://my-guru-test.herokuapp.com/", "new_window": True},
 
         # model admin to link to (Permissions checked against model)
         {"model": "auth.User"},
@@ -236,17 +234,13 @@ JAZZMIN_SETTINGS = {
         # App with dropdown menu to all its models pages (Permissions checked against models)
         {"app": "videoCarrer"}
     ],
-    "usermenu_links": [
-        {"name": "Support", "url": "https://github.com/farridav/django-jazzmin/issues", "new_window": True},
-        {"model": "auth.user"} ##==> not showr
-    ],
     "show_sidebar": True,
     "navigation_expanded": True,
 
-    "hide_apps": ["Auth Token", "Django_Rest_Passwordreset"],
+    "hide_apps": ["Authtoken", "Django_Rest_Passwordreset"],
     "hide_models": [
         "Videocarrer.VideoRating", "Videocarrer.VideoNoView", 
-        "Videocarrer.YouTubeVideo", "auth.Group", "authtoken.Tokens"
+        "Videocarrer.YouTubeVideo", 
         ],
     "order_with_respect_to": ["auth", "Videocarrer",],
 

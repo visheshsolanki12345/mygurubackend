@@ -6,8 +6,9 @@ from django_mysql.models import ListCharField
 from django.db.models import CharField, Model
 from django_mysql.models import ListF
 from django.contrib.auth.models import User
-
 # Create your models here.
+from ckeditor.fields import RichTextField
+
 
 class SelectAcademic(models.Model):
     classOrCollage = models.CharField(max_length=400,null=True, blank=True)
@@ -48,13 +49,19 @@ class Title(models.Model):
         verbose_name_plural = "Test Title of Classes"
     def __str__(self):
         return str(f"{self.className} - {self.classSection}")
-    
+
+class SectionInterest(models.Model):
+    sectionInterest = models.CharField(max_length=400, null=True, blank=True)
 
 class Section(models.Model):
     section = models.CharField(max_length=400, null=True, blank=True) 
-    sectionInterest = models.CharField(max_length=400, null=True, blank=True) 
+    sectionInterest = models.BooleanField(default=False)
     duration = models.CharField(max_length=200,null=True, blank=True)
     number = models.FloatField(null=True, blank=True)
+    def save(self, *args, **kwargs):
+        if self.sectionInterest == True:
+            SectionInterest.objects.create(sectionInterest = self.section)
+        super(Section, self).save(*args, **kwargs)
     class Meta:
         verbose_name_plural = "Add Section"
     def __str__(self):
@@ -178,7 +185,7 @@ RIGHT_ANS_CHOICES =(
 
 class ImageOptionsTest(models.Model):
     section = models.ForeignKey(Section,on_delete=CASCADE,max_length=400, null=True, blank=True)
-    questionText = models.TextField(null=True, blank=True)
+    questionText = RichTextField(null=True, blank=True)
     question= models.ImageField(upload_to = 'Image-Test', null=True, blank=True, max_length=200)
     a = models.ImageField(upload_to = 'Image-Test', null=True, blank=True, max_length=200)
     aText = models.TextField(null=True, blank=True)
@@ -349,11 +356,11 @@ class Reports(models.Model):
     # question = models.CharField(null=True, blank=True, max_length=200)
     interpretatio = models.ForeignKey(Interpretation,on_delete=CASCADE, max_length=500, null=True, blank=True)
     grade = models.CharField(null=True, blank=True, max_length=100)
-    totalCount = models.IntegerField(null=True, blank=True)
+    totalCount = models.FloatField(null=True, blank=True)
     # CreateAt = models.DateTimeField(null=True, blank=True, auto_now_add=True)
     # industry_Grade = models.CharField(null=True, blank=True, max_length=200)
     typeOftest = models.CharField(null=True, blank=True, max_length=200)
-    totalNoQu = models.CharField(null=True, blank=True, max_length=200)
+    totalNoQu = models.FloatField(null=True, blank=True, max_length=200)
     carrer = models.ForeignKey(Career,on_delete=CASCADE, max_length=500, null=True, blank=True)
     def __str__(self):
         return str(f"{self.user} - {self.Class} - {self.classSection}")
@@ -453,4 +460,8 @@ class PaymentHistory(models.Model):
 
     def __str__(self):
         return str(f"{self.user} - {self.Class} - {self.classSection}" )
-    
+
+class CarrerDescription(models.Model):
+    carrer = models.ForeignKey(Career,on_delete=CASCADE,max_length=400, null=True, blank=True)
+    section = models.ForeignKey(Section,on_delete=CASCADE,max_length=400, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)

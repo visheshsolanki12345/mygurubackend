@@ -1,3 +1,4 @@
+from urllib import request
 from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.views.decorators.csrf import csrf_exempt
@@ -17,7 +18,7 @@ from .models import (
     AddClassSection, Career, NewClass, ResultTitle, SelectNumber, ShowGrade, Section, Interpretation, TestBackupOneQuizeCorrect, Title,
      ImageOptionsTest, OneOptionsTest, Reports, 
     OptionsTest, AddTest, TestCategory, ThreeOptionsTest, FiveOptionsTest,TestBackupOneImageQuizeCorrect, PaymentHistory,
-    TestBackupMultipalQuize, TestBackupFiveQuize, TestBackupThreeQuize
+    TestBackupMultipalQuize, TestBackupFiveQuize, TestBackupThreeQuize, SectionInterest, CarrerDescription
     )
 
 from .serializer import (
@@ -25,7 +26,7 @@ from .serializer import (
     NewClassSerializer, OneOptionsTestSerializer, OptionsTestSerializer, ResultTitleSerializer, TestBackupFiveQuizeSerializer, 
     TestBackupMultipalQuizeSerializer, TestBackupOneImageQuizeCorrectSerializer, TestBackupOneQuizeCorrectSerializer, 
     TestBackupThreeQuizeSerializer, ThreeOptionsTestSerializer, TitleSerializer,
-    ReportsSerializer,ShowGradeSerializer, InterpretationSerializer
+    ReportsSerializer,ShowGradeSerializer, InterpretationSerializer, SectionInterestSerializer, CarrerDescriptionSerializer
 )
 
 
@@ -45,6 +46,18 @@ def testSelect(request):
     serializer = NewClassSerializer(que, many=True)
     return Response(serializer.data)
 
+@api_view(['GET'])
+def interestSections(request):
+    que = SectionInterest.objects.all()
+    serializer = SectionInterestSerializer(que, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def carrerDescription(request):
+    que = CarrerDescription.objects.all()
+    serializer = CarrerDescriptionSerializer(que, many=True)
+    return Response(serializer.data)
+
 
 @api_view(['GET'])
 # @authentication_classes([JWTAuthentication])
@@ -62,8 +75,6 @@ def classSection(request, pk):
         context['newClass'] = i.classSection.classSection
         p.append((collections.OrderedDict(context)))
     return Response(p)
-
-
 
 
 
@@ -339,11 +350,21 @@ def saveTestBackup(user, typeTest, Class, classSection, section, question, objec
 
     elif typeTest == allOption:
         que = OptionsTest.objects.filter(section=sectionID, question=question)
+        
         for i in que:
-            upBackup = TestBackupMultipalQuize.objects.filter(user = user ,className = classID, classSection = classSectionId, multipalQuize = i.id)
+            upBackup = TestBackupMultipalQuize.objects.filter(user = user ,className = classID, classSection = classSectionId, multipalQuize = i.id, userClickObj = object)
             if upBackup:
-                upBackup.update(userClickObj = object)
+                upBackup.delete()
                 return True
+            
+            upCount = TestBackupMultipalQuize.objects.filter(user = user ,className = classID, classSection = classSectionId, multipalQuize = i.id)
+            if upCount:
+                for i in upCount:
+                    myNumber = int(i.number)
+                total = myNumber + mark
+                upCount.update(number = str(total))
+                return True
+    
             op = TestBackupMultipalQuize.objects.create(user = user, userClickObj = object)
             TestBackupMultipalQuize.objects.filter(id=op.id).update(
                 typeOfTest = testID,
@@ -352,6 +373,7 @@ def saveTestBackup(user, typeTest, Class, classSection, section, question, objec
                 multipalQuize = i.id,
                 testDiscription = addTestID,
                 lastTime = lastTime,
+                userClickObj = object,
                 number = mark,
                 )
             return True
@@ -488,6 +510,7 @@ def resultGeneratorBackup(user, typeOfTest, Class, classSection):
                     var += int(j.split('-')[1])
         context[str(i)] = var
         var = 0
+
     return context
 
 
@@ -543,6 +566,8 @@ def findSectionResult(user, typeOfTest, Class, classSection):
         myArray = []
         noID = ''
         testID = ''
+        interp = ''
+        grade = ''
         
         if typeOfTest == allOption:
             toQuCount = OptionsTest.objects.filter(section = secID).count()
@@ -599,7 +624,9 @@ def findSectionResult(user, typeOfTest, Class, classSection):
                 countNO.append(i.rightAns)
 
             elif typeOfTest == imageTest:
-                countNO.append(i.rightAns)
+                countNO.append(i.a)
+                countNO.append(i.b)
+                countNO.append(i.c)
 
 
         if typeOfTest == fiveOption:
@@ -613,14 +640,48 @@ def findSectionResult(user, typeOfTest, Class, classSection):
             noSum = max(countNO) * toQuCount
         
         elif typeOfTest == imageTest:
-            noSum = max(countNO) * toQuCount
+            try:
+                obj = SectionInterest.objects.get(sectionInterest = allSecId.section)
+                if obj:
+                    noSum = max(countNO) * toQuCount
+            except:
+                noSum = secID.number * toQuCount
+            
         
         elif typeOfTest == oneOption:
             noSum = max(countNO) * toQuCount
-        Reports.objects.create(
-            user = user, section = allSecId.section, sectionInterest = allSecId.sectionInterest, totalCount = '0', totalNoQu = noSum,
-            typeOftest = typeOfTest, classSection = classSection, Class = Class, grade = "Not Attempted"
-        )
+        totalMarks = 0
+        que = ShowGrade.objects.filter(className = classID, classSection = classSectionId, section = secID)
+        
+        for i in que:
+            context = i.the_json
+        for key in context:
+            p = f"{key}, {context[key]}"
+            str = convertTuple(p)
+            f = str.split('-')[0]
+            grade = f.split(',')[0]
+            first = f.split(',')[1]
+            second = str.split('-')[1]
+            array = []
+            x = range(int(first), int(second), 1)
+            for n in x:
+                array.append(n)
+                lastV = array[-1]
+            array.append(lastV+1)
+            nu = int(totalMarks)
+            if nu in array:
+                array = []
+                interp = Interpretation.objects.get(className = classID, classSection = classSectionId, section = secID)
+                Reports.objects.create(
+                    user = user, section = allSecId.section, sectionInterest = allSecId.sectionInterest, totalCount = totalMarks, totalNoQu = noSum,
+                    typeOftest = typeOfTest, classSection = classSection, Class = Class, grade = grade, interpretatio = interp,
+                )
+                    # if carrer != None:
+                        # obj = Career.objects.filter(newCareer = carrer)
+                        # for i in obj:
+                        #     carrerID = i.id
+                    
+                continue        
     return
 
 
@@ -700,6 +761,7 @@ def saveResult(user, typeOfTest, Class, classSection):
         return Response(status.HTTP_404_NOT_FOUND)
 
     argu_one = resultGeneratorBackup(user, typeOfTest, Class, classSection)
+    
     for key1, value1 in argu_one.items():
         sec = Section.objects.filter(section = key1)
         for i in sec:
@@ -749,13 +811,33 @@ def getResultFunc(user, typeOfTest, Class, classSection):
 
 
     if typeOfTest == allOption:
-        que = Reports.objects.filter(user=user, Class = Class, classSection = classSection, typeOftest = typeOfTest)
+        que = Reports.objects.filter(user=user, Class = Class, classSection = classSection, typeOftest = typeOfTest).order_by('-totalCount')
         serializer = ReportsSerializer(que, many=True)
         return serializer.data
     if typeOfTest == imageTest:
-        que = Reports.objects.filter(user=user, Class = Class, classSection = classSection, typeOftest = typeOfTest)
-        serializer = ReportsSerializer(que, many=True)
-        return serializer.data
+        aray1 = []
+        aray2 = []
+        queStore = Reports.objects.filter(user=user, Class = Class, classSection = classSection, typeOftest = typeOfTest)
+        intSecObj = SectionInterest.objects.all()
+        for i in intSecObj:
+            aray1.append(i.sectionInterest)
+
+        for i in queStore:
+            if i.section not in aray1:
+                aray2.append(i.section)
+        queAbcArray = []
+        que2Array = []
+        for i in aray1:
+            queAbcArray.append(Reports.objects.filter(user=user, Class = Class, classSection = classSection, typeOftest = typeOfTest, section = i))
+        for i in aray2:
+            que2Array.append(Reports.objects.filter(user=user, Class = Class, classSection = classSection, typeOftest = typeOfTest, section = i))
+        flat_listOne = [item for sublist in queAbcArray for item in sublist]
+        flat_listTwo = [item for sublist in que2Array for item in sublist]
+
+        serializerOne = ReportsSerializer(flat_listOne, many=True)
+        serializerTwo = ReportsSerializer(flat_listTwo, many=True)
+        myArray = [serializerOne.data, serializerTwo.data]
+        return myArray
     if typeOfTest == oneOption:
         que = Reports.objects.filter(user=user, Class = Class, classSection = classSection, typeOftest = typeOfTest)
         serializer = ReportsSerializer(que, many=True)
@@ -1053,6 +1135,7 @@ class ResultShowDeleteAll:
         self.lock.notify()
         self.lock.release()
 
+
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -1094,7 +1177,26 @@ def getResult(request):
     return Response(getResultDelEtc.getResultData)
 
     
-
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def imageTypeLastDataUpdate(request):
+    data = request.data
+    user = request.user
+    context = {}
+    section = data['section']
+    lastTime = data['lastTime']
+    try:
+        obj = TestBackupOneImageQuizeCorrect.objects.filter(user = user)
+        for i in obj:
+            if (i.imageOneQuizeCorrect.section.section) == section:
+                context[i.id] = i.imageOneQuizeCorrect.section.section
+        saveObj = TestBackupOneImageQuizeCorrect.objects.get(id = list(context)[-1])
+        saveObj.lastTime = lastTime
+        saveObj.save()
+        return Response(status.HTTP_201_CREATED)
+    except:
+        return Response(status.HTTP_304_NOT_MODIFIED)
 
 
     

@@ -1,3 +1,4 @@
+from operator import mod
 from django.db import models
 from django.contrib.auth.models import User
 from CareerManagementSystem.models import Carrer
@@ -39,8 +40,10 @@ class VideoCarrer(models.Model):
     rating = models.FloatField(null=True, blank=True, default=0)
     noView = models.IntegerField(null=True, blank=True, default=0)
     createAt = models.DateTimeField(auto_now_add=True)
+    hide = models.BooleanField(default=False)
     thumbnailImage  = models.ImageField(upload_to=video_carrer,null=True, blank=True)
 
+    
     def __str__(self):
         return str(self.carrer)
 

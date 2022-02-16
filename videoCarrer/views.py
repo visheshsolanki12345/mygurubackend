@@ -51,7 +51,7 @@ def get_video_carrer_func(id, request, check):
         if id in views.carrerIdContext:
             id = views.carrerIdContext[id]
         carrerId = Carrer.objects.get(id = id)
-        obj = VideoCarrer.objects.filter(carrer = carrerId, rating__gte=4).order_by('-createAt')[:10]
+        obj = VideoCarrer.objects.filter(carrer = carrerId, rating__gte=4, hide=False).order_by('-createAt')[:10]
         serializer = VideoCarrerSerializer(obj, many=True)
         return serializer.data
     
@@ -93,8 +93,14 @@ def get_video_carrer_func(id, request, check):
         query = request.query_params.get('keyword')
         if query == None:
             query = ''
-            # obj = VideoCarrer.objects.filter().order_by('-createAt')[:10]
-            obj = VideoCarrer.objects.filter().order_by('-createAt')
+            try:
+                obj = VideoCarrer.objects.filter().order_by('-createAt')[:10]
+                if request.data['choice'] == "videoTrand":
+                    obj = VideoCarrer.objects.filter().order_by('-noView')
+                else:
+                    obj = VideoCarrer.objects.filter().order_by('-createAt')
+            except:
+                obj = VideoCarrer.objects.filter().order_by('-createAt')
         else:
             if query in views.carrerIdContext:
                 carrerSearch = views.carrerIdContext[query]
@@ -102,7 +108,7 @@ def get_video_carrer_func(id, request, check):
             views.carrerIdContext[query] = carrerSearch
             obj = VideoCarrer.objects.filter(carrer=carrerSearch).order_by('-createAt')
         page = request.query_params.get('page')
-        paginator = Paginator(obj,1)
+        paginator = Paginator(obj,2)
 
         try:
             obj = paginator.page(page)
@@ -193,20 +199,23 @@ class VideoCarrerViewSet(viewsets.ViewSet):
         return Response(classOj.singleData)
 
 
+
 videoSignal = ''
 
 @api_view(['GET', 'POST'])
-# @authentication_classes([JWTAuthentication])
+@authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def videoView(request, pk):
     data = request.data
     user = request.user
     global videoSignal
     def rating_count(pk):
+        global videoCarrerSingleDataContext
         global videoSignal
         obj = VideoCarrer.objects.get(id = pk)
         if VideoRating.objects.filter(user = user, videoCarrer  = obj).exists():
             videoSignal = False
+            videoCarrerSingleDataContext = {}
             return 
         else:
             VideoRating.objects.create(
@@ -215,9 +224,11 @@ def videoView(request, pk):
                 rating = data['rating'],
             )
             ratingCount = obj.rating
-            obj.rating = ((5 * ratingCount) + data['rating']) / (ratingCount + 1)
+            answer = ((5 * ratingCount) + float(data['rating'])) / (ratingCount + 1)
+            obj.rating = round(answer, 1)
             obj.save()
             videoSignal = True
+            videoCarrerSingleDataContext = {}
             return 
     t = Thread(target=rating_count, args=(pk,))
     t.start()
@@ -230,3 +241,18 @@ def videoView(request, pk):
         return Response(status.HTTP_208_ALREADY_REPORTED)
 
 
+@api_view(['GET', 'POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def allVideoFunc(requst):
+    objAll = VideoCarrer.objects.all()
+    objTrand = VideoCarrer.objects.filter().order_by('-noView')
+    objCreate = VideoCarrer.objects.filter().order_by('-createAt')
+    serializerAll = VideoCarrerSerializer(objAll, many=True)
+    serializerTrand = VideoCarrerSerializer(objTrand, many=True)
+    serializerCreate = VideoCarrerSerializer(objCreate, many=True)
+    context = {
+        "allVideo" : serializerAll.data, "trandVideo" : serializerTrand.data,
+        "allCreate" : serializerCreate.data
+        }
+    return Response(context)

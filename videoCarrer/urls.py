@@ -14,6 +14,7 @@ router.register('video-admin', adminView.VideoCarrerAdminViewSet, basename="vide
 urlpatterns = [
     path('', include(router.urls)),
     path('youtube/', views.getYouTubVideo, name="youtube"),
+    path('all-video/', views.allVideoFunc, name="all-video"),
 
 
     path('video-views/<str:pk>/', views.videoView, name="video-views"),

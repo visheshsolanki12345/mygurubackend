@@ -17,8 +17,11 @@ urlpatterns = [
     path('payment-decriment/', views.paymentDecriment, name="payment-decrimen"),
     path('payment-router/', views.checkPaymentRouter, name="payment-router"),
     path('test/', views.saveBackup_all, name="test"),
+    path('last-time/', views.imageTypeLastDataUpdate, name="last-time"),
+    path('interest-sections/', views.interestSections, name="interest-sections"),
+    path('carrer-description/', views.carrerDescription, name="carrer-description"),
 
-    # path('self/', views.findSection, name="self"),
+    path('self/', views.imageTypeLastDataUpdate, name="self"),
 
     # // payment URL
     path('handlepayment/', views.HandlePaytemRequest, name='HandleRequest'),
