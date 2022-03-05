@@ -32,9 +32,9 @@ class AddClassSectionModelAdmin(admin.ModelAdmin):
     list_filter = ()
     fieldsets = ()
 
-# @admin.register(SectionInterest)
-# class SectionInterestAdmin(admin.ModelAdmin):
-#     list_display = ['sectionInterest']
+@admin.register(SectionInterest)
+class SectionInterestAdmin(admin.ModelAdmin):
+    list_display = ['sectionInterest']
 
 @admin.register(Section)
 class SectionModelAdmin(admin.ModelAdmin):
@@ -157,7 +157,7 @@ class TitleModelAdmin(admin.ModelAdmin):
 
 @admin.register(ResultTitle)
 class ResultTitleModelAdmin(admin.ModelAdmin):
-    list_display = ['typeOfTest', 'className', 'classSection', 'mainHeading', 'title', 'discription', 'point', 'the_json']
+    list_display = ['typeOfTest', 'className', 'classSection', 'mainHeading', 'title', 'discription', 'point', 'pointDiscription', 'the_json']
     search_fields = [
         'className__newClass', 'classSection__classSection', 
         'typeOfTest__selectTest'
@@ -180,9 +180,9 @@ class AddTestModelAdmin(admin.ModelAdmin):
     fieldsets = ()
 
 
-# @admin.register(Reports)
-# class ReportsModelAdmin(admin.ModelAdmin):
-#     list_display = ['id','user', 'Class', 'classSection', 'sectionInterest', 'carrer', 'section', 'interpretatio', 'grade', 'totalCount', 'typeOftest', 'totalNoQu']
+@admin.register(Reports)
+class ReportsModelAdmin(admin.ModelAdmin):
+    list_display = ['id','user', 'Class', 'classSection', 'sectionInterest', 'carrer', 'section', 'interpretatio', 'grade', 'totalCount', 'typeOftest', 'totalNoQu']
 
 # @admin.register(PaymentHistory)
 # class PaymentHistoryModelAdmin(admin.ModelAdmin):
@@ -192,9 +192,10 @@ class AddTestModelAdmin(admin.ModelAdmin):
 # class TestBackupOneQuizeCorrectModelAdmin(admin.ModelAdmin):
 #     list_display = ['user', 'typeOfTest', 'className', 'classSection', 'oneQuizeCorrect', 'testDiscription', 'userClickObj', 'lastTime', 'number']
 
-# @admin.register(TestBackupOneImageQuizeCorrect)
-# class TestBackupOneImageQuizeCorrectModelAdmin(admin.ModelAdmin):
-#     list_display = ['user', 'typeOfTest', 'className', 'classSection', 'imageOneQuizeCorrect', 'testDiscription', 'userClickObj', 'lastTime', 'number']
+
+@admin.register(TestBackupOneImageQuizeCorrect)
+class TestBackupOneImageQuizeCorrectModelAdmin(admin.ModelAdmin):
+    list_display = ['user', 'typeOfTest', 'className', 'classSection', 'imageOneQuizeCorrect', 'testDiscription', 'userClickObj', 'lastTime', 'number']
 
 
 # @admin.register(TestBackupMultipalQuize)
@@ -210,6 +211,7 @@ class AddTestModelAdmin(admin.ModelAdmin):
 # @admin.register(TestBackupThreeQuize)
 # class TestBackupThreeQuizeModelAdmin(admin.ModelAdmin):
 #     list_display = ['user', 'typeOfTest', 'className', 'classSection', 'threeQuize', 'testDiscription', 'userClickObj', 'lastTime', 'number']
+
 
 # @admin.register(CarrerDescription)
 # class CarrerDescriptionAdmin(admin.ModelAdmin):

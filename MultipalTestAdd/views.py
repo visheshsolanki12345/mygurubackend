@@ -16,15 +16,15 @@ import time
 
 from .models import (
     AddClassSection, Career, NewClass, ResultTitle, SelectNumber, ShowGrade, Section, Interpretation, TestBackupOneQuizeCorrect, Title,
-     ImageOptionsTest, OneOptionsTest, Reports, 
+     ImageOptionsTest, OneOptionsTest, Reports,
     OptionsTest, AddTest, TestCategory, ThreeOptionsTest, FiveOptionsTest,TestBackupOneImageQuizeCorrect, PaymentHistory,
     TestBackupMultipalQuize, TestBackupFiveQuize, TestBackupThreeQuize, SectionInterest, CarrerDescription
     )
 
 from .serializer import (
-    AddTestSerializer, FiveOptionsTestSerializer, ImageOptionsTestSerializer, 
-    NewClassSerializer, OneOptionsTestSerializer, OptionsTestSerializer, ResultTitleSerializer, TestBackupFiveQuizeSerializer, 
-    TestBackupMultipalQuizeSerializer, TestBackupOneImageQuizeCorrectSerializer, TestBackupOneQuizeCorrectSerializer, 
+    AddTestSerializer, FiveOptionsTestSerializer, ImageOptionsTestSerializer,
+    NewClassSerializer, OneOptionsTestSerializer, OptionsTestSerializer, ResultTitleSerializer, TestBackupFiveQuizeSerializer,
+    TestBackupMultipalQuizeSerializer, TestBackupOneImageQuizeCorrectSerializer, TestBackupOneQuizeCorrectSerializer,
     TestBackupThreeQuizeSerializer, ThreeOptionsTestSerializer, TitleSerializer,
     ReportsSerializer,ShowGradeSerializer, InterpretationSerializer, SectionInterestSerializer, CarrerDescriptionSerializer
 )
@@ -96,10 +96,10 @@ def testInfo(request):
 
     if filterByClass == None and classSection == None:
         return Response(status.HTTP_404_NOT_FOUND)
-    
+
     classSec = AddClassSection.objects.filter(id = classSectionLocal)
     for i in classSec:
-        classSectionId = i.id 
+        classSectionId = i.id
 
     dis = AddTest.objects.filter(className = filterByClass, classSection = classSectionId)
     for i in dis:
@@ -169,17 +169,17 @@ def PaytemFunc(orderId, amount, userEmail, user, typeOfTest, Class, classSection
         # 'CALLBACK_URL':'https://visheshsolanki.pythonanywhere.com/api/handlepayment/',
     }
     PaymentHistory.objects.create(
-        user = user, 
-        ORDER_ID = orderId, 
-        TXN_AMOUNT = amount, 
-        typeOfTest = typeOfTest, 
+        user = user,
+        ORDER_ID = orderId,
+        TXN_AMOUNT = amount,
+        typeOfTest = typeOfTest,
         Class = Class,
-        classSection = classSection, 
+        classSection = classSection,
         email = userEmail,
     )
     param_dict['CHECKSUMHASH'] = Checksum.generate_checksum(param_dict, settings.PAYTEM_MERCHANT_KEY)
     return param_dict
-    
+
 
 @csrf_exempt
 @api_view(['POST', 'GET'])
@@ -197,9 +197,9 @@ def HandlePaytemRequest(request):
         if verify:
             PaymentHistory.objects.filter(ORDER_ID = response_dict['ORDERID']).update(
                 gateway=response_dict['GATEWAYNAME'],
-                bankname=response_dict['BANKNAME'], 
-                TXNID=response_dict['TXNID'], 
-                status=response_dict['STATUS'], 
+                bankname=response_dict['BANKNAME'],
+                TXNID=response_dict['TXNID'],
+                status=response_dict['STATUS'],
                 TXNDATE=response_dict['TXNDATE'],
                 RESPCODE=response_dict['RESPCODE'],
                 CURRENCY=response_dict['CURRENCY'],
@@ -271,10 +271,10 @@ def saveTestBackup(user, typeTest, Class, classSection, section, question, objec
     classType = NewClass.objects.filter(newClass = Class)
     for i in classType:
         classID = i.id
-    
+
     classSec = AddClassSection.objects.filter(id = classSection)
     for i in classSec:
-        classSectionId = i.id 
+        classSectionId = i.id
 
     testType = TestCategory.objects.filter(selectTest = typeTest)
     for i in testType:
@@ -283,7 +283,7 @@ def saveTestBackup(user, typeTest, Class, classSection, section, question, objec
     sectionType = Section.objects.filter(section = section)
     for i in sectionType:
         sectionID = i.id
-    
+
     testAdd = AddTest.objects.filter(className = classID, typeOfTest = testID)
     for i in testAdd:
         addTestID = i.id
@@ -299,7 +299,7 @@ def saveTestBackup(user, typeTest, Class, classSection, section, question, objec
             TestBackupOneQuizeCorrect.objects.filter(id=op.id).update(
                 typeOfTest = testID,
                 className = classID,
-                classSection = classSectionId, 
+                classSection = classSectionId,
                 oneQuizeCorrect = i.id,
                 testDiscription = addTestID,
                 lastTime = lastTime,
@@ -325,7 +325,7 @@ def saveTestBackup(user, typeTest, Class, classSection, section, question, objec
                 TestBackupOneImageQuizeCorrect.objects.filter(id=op.id).update(
                     typeOfTest = testID,
                     className = classID,
-                    classSection = classSectionId, 
+                    classSection = classSectionId,
                     imageOneQuizeCorrect = i.id,
                     testDiscription = addTestID,
                     lastTime = lastTime,
@@ -336,27 +336,27 @@ def saveTestBackup(user, typeTest, Class, classSection, section, question, objec
                 TestBackupOneImageQuizeCorrect.objects.create(
                     user = upBackup.user,
                     typeOfTest = upBackup.typeOfTest,
-                    className = upBackup.className, 
-                    classSection = upBackup.classSection, 
+                    className = upBackup.className,
+                    classSection = upBackup.classSection,
                     testDiscription = upBackup.testDiscription,
                     imageOneQuizeCorrect = upBackup.imageOneQuizeCorrect,
-                    userClickObj = object, 
-                    number = mark, 
+                    userClickObj = object,
+                    number = mark,
                     lastTime = lastTime
                 )
                 TestBackupOneImageQuizeCorrect.objects.filter(id = upBackup.id).delete()
                 return True
-            
+
 
     elif typeTest == allOption:
         que = OptionsTest.objects.filter(section=sectionID, question=question)
-        
+
         for i in que:
             upBackup = TestBackupMultipalQuize.objects.filter(user = user ,className = classID, classSection = classSectionId, multipalQuize = i.id, userClickObj = object)
             if upBackup:
                 upBackup.delete()
                 return True
-            
+
             upCount = TestBackupMultipalQuize.objects.filter(user = user ,className = classID, classSection = classSectionId, multipalQuize = i.id)
             if upCount:
                 for i in upCount:
@@ -364,12 +364,12 @@ def saveTestBackup(user, typeTest, Class, classSection, section, question, objec
                 total = myNumber + mark
                 upCount.update(number = str(total))
                 return True
-    
+
             op = TestBackupMultipalQuize.objects.create(user = user, userClickObj = object)
             TestBackupMultipalQuize.objects.filter(id=op.id).update(
                 typeOfTest = testID,
                 className = classID,
-                classSection = classSectionId, 
+                classSection = classSectionId,
                 multipalQuize = i.id,
                 testDiscription = addTestID,
                 lastTime = lastTime,
@@ -388,14 +388,14 @@ def saveTestBackup(user, typeTest, Class, classSection, section, question, objec
             TestBackupFiveQuize.objects.filter(id=op.id).update(
                 typeOfTest = testID,
                 className = classID,
-                classSection = classSectionId, 
+                classSection = classSectionId,
                 fiveQuize = i.id,
                 testDiscription = addTestID,
                 lastTime = lastTime,
                 number = mark,
                 )
             return True
-            
+
     elif typeTest == threeOption:
         que = ThreeOptionsTest.objects.filter(section=sectionID, question=question)
         for i in que:
@@ -407,7 +407,7 @@ def saveTestBackup(user, typeTest, Class, classSection, section, question, objec
             TestBackupThreeQuize.objects.filter(id=op.id).update(
                 typeOfTest = testID,
                 className = classID,
-                classSection = classSectionId, 
+                classSection = classSectionId,
                 threeQuize = i.id,
                 testDiscription = addTestID,
                 lastTime = lastTime,
@@ -417,7 +417,7 @@ def saveTestBackup(user, typeTest, Class, classSection, section, question, objec
 
     else:
         return False
-    
+
 
 def backupGet(user, typeTest, Class, classSection):
 
@@ -429,7 +429,7 @@ def backupGet(user, typeTest, Class, classSection):
 
     classType = NewClass.objects.filter(newClass = Class)
     for i in classType:
-        classID = i.id 
+        classID = i.id
 
     classSec = AddClassSection.objects.filter(id = classSection)
     for i in classSec:
@@ -459,7 +459,7 @@ def backupGet(user, typeTest, Class, classSection):
         que = TestBackupFiveQuize.objects.filter(user = user ,className = classID, classSection = classSectionId)
         serializer = TestBackupFiveQuizeSerializer(que, many=True)
         return serializer.data
-    
+
 
 
 def resultGeneratorBackup(user, typeOfTest, Class, classSection):
@@ -467,7 +467,7 @@ def resultGeneratorBackup(user, typeOfTest, Class, classSection):
     classID = NewClass.objects.get(newClass = Class)
     classSection = AddClassSection.objects.get(id = classSection)
     mysite = []
-    
+
     if typeOfTest == oneOption:
         que = TestBackupOneQuizeCorrect.objects.filter(user = user ,className = classID, classSection = classSection)
         for i in que:
@@ -482,7 +482,7 @@ def resultGeneratorBackup(user, typeOfTest, Class, classSection):
         que = TestBackupMultipalQuize.objects.filter(user = user ,className = classID, classSection = classSection)
         for i in que:
             mysite.append(f"{str(i.multipalQuize.section)}-{i.number}")
-            
+
     elif typeOfTest == fiveOption:
         que = TestBackupFiveQuize.objects.filter(user = user ,className = classID, classSection = classSection)
         for i in que:
@@ -499,7 +499,7 @@ def resultGeneratorBackup(user, typeOfTest, Class, classSection):
         k = i.split('-')[0]
         xset.append(k)
     setV = set(xset)
-    
+
     var = 0
     for i in setV:
         for j in mysite:
@@ -525,12 +525,12 @@ def findSectionResult(user, typeOfTest, Class, classSection):
     classObj = NewClass.objects.filter(newClass = Class)
     for i in classObj:
         classID = i.id
-    
+
     classSec = AddClassSection.objects.filter(id = classSection)
     for i in classSec:
         classSectionId = i.id
 
-    
+
     arraySet = set()
 
     if typeOfTest == allOption:
@@ -556,11 +556,10 @@ def findSectionResult(user, typeOfTest, Class, classSection):
         sectionAll = FiveOptionsTest.objects.all()
         for i in sectionAll:
             arraySet.add(i.section)
-    
-    
+
+
     for allSecId in arraySet:
         secID = Section.objects.get(section = allSecId)
-
         countNO = []
         toQuCount = ''
         myArray = []
@@ -568,7 +567,7 @@ def findSectionResult(user, typeOfTest, Class, classSection):
         testID = ''
         interp = ''
         grade = ''
-        
+
         if typeOfTest == allOption:
             toQuCount = OptionsTest.objects.filter(section = secID).count()
             NoCo = OptionsTest.objects.filter(section = secID)
@@ -597,7 +596,7 @@ def findSectionResult(user, typeOfTest, Class, classSection):
         newTest = AddTest.objects.filter(className=classID, classSection = classSectionId, typeOfTest=testID)
         for i in newTest:
             noID = i.selectNumber.id
-        
+
         noSum = CountSum(typeOfTest)
         noObj = SelectNumber.objects.filter(id=noID)
         for i in noObj:
@@ -631,57 +630,66 @@ def findSectionResult(user, typeOfTest, Class, classSection):
 
         if typeOfTest == fiveOption:
             noSum = max(countNO) * toQuCount
-        
+
         if typeOfTest == allOption:
             mul = sum(countNO) * len(myArray)
             noSum = mul / len(countNO)
 
         elif typeOfTest == threeOption:
             noSum = max(countNO) * toQuCount
-        
+
         elif typeOfTest == imageTest:
-            try:
-                obj = SectionInterest.objects.get(sectionInterest = allSecId.section)
-                if obj:
-                    noSum = max(countNO) * toQuCount
-            except:
+            obj = SectionInterest.objects.filter(sectionInterest = allSecId.section)
+            if obj:
+                noSum = max(countNO) * toQuCount
+            else:
                 noSum = secID.number * toQuCount
-            
-        
+
+
         elif typeOfTest == oneOption:
             noSum = max(countNO) * toQuCount
         totalMarks = 0
         que = ShowGrade.objects.filter(className = classID, classSection = classSectionId, section = secID)
         
-        for i in que:
-            context = i.the_json
-        for key in context:
-            p = f"{key}, {context[key]}"
-            str = convertTuple(p)
-            f = str.split('-')[0]
-            grade = f.split(',')[0]
-            first = f.split(',')[1]
-            second = str.split('-')[1]
-            array = []
-            x = range(int(first), int(second), 1)
-            for n in x:
-                array.append(n)
-                lastV = array[-1]
-            array.append(lastV+1)
-            nu = int(totalMarks)
-            if nu in array:
+        if typeOfTest != imageTest:
+            for i in que:
+                context = i.the_json
+            for key in context:
+                p = f"{key}, {context[key]}"
+                str = convertTuple(p)
+                f = str.split('-')[0]
+                grade = f.split(',')[0]
+                first = f.split(',')[1]
+                second = str.split('-')[1]
                 array = []
-                interp = Interpretation.objects.get(className = classID, classSection = classSectionId, section = secID)
-                Reports.objects.create(
-                    user = user, section = allSecId.section, sectionInterest = allSecId.sectionInterest, totalCount = totalMarks, totalNoQu = noSum,
-                    typeOftest = typeOfTest, classSection = classSection, Class = Class, grade = grade, interpretatio = interp,
-                )
+                x = range(int(first), int(second), 1)
+                for n in x:
+                    array.append(n)
+                    lastV = array[-1]
+                array.append(lastV+1)
+                nu = int(totalMarks)
+                if nu in array:
+                    array = []
+                    interp = Interpretation.objects.get(className = classID, classSection = classSectionId, section = secID)
+                    Reports.objects.create(
+                        user = user, section = allSecId.section, sectionInterest = allSecId.sectionInterest, 
+                        totalCount = round(totalMarks, 2), totalNoQu = noSum, typeOftest = typeOfTest, 
+                        classSection = classSection, Class = Class, grade = grade, interpretatio = interp
+                    )
+        else:
+            interp = Interpretation.objects.get(className = classID, classSection = classSectionId, section = secID)
+            Reports.objects.create(
+                user = user, section = allSecId.section, sectionInterest = allSecId.sectionInterest, 
+                totalCount = round(totalMarks, 2), totalNoQu = noSum, typeOftest = typeOfTest, 
+                classSection = classSection, Class = Class, grade = 'Below Average', interpretatio = interp
+            )        
+
                     # if carrer != None:
                         # obj = Career.objects.filter(newCareer = carrer)
                         # for i in obj:
                         #     carrerID = i.id
-                    
-                continue        
+
+            continue
     return
 
 
@@ -752,7 +760,7 @@ def saveResult(user, typeOfTest, Class, classSection):
     classObj = NewClass.objects.filter(newClass = Class)
     for i in classObj:
         classID = i.id
-    
+
     classSec = AddClassSection.objects.filter(id = classSection)
     for i in classSec:
         classSectionId = i.id
@@ -761,15 +769,15 @@ def saveResult(user, typeOfTest, Class, classSection):
         return Response(status.HTTP_404_NOT_FOUND)
 
     argu_one = resultGeneratorBackup(user, typeOfTest, Class, classSection)
-    
+
     for key1, value1 in argu_one.items():
         sec = Section.objects.filter(section = key1)
         for i in sec:
             secID = i.id
-            
+
         context = {}
         totalMarks = value1
-        
+
         que = ShowGrade.objects.filter(className = classID, classSection = classSectionId, section = secID)
         for i in que:
             context = i.the_json
@@ -793,15 +801,21 @@ def saveResult(user, typeOfTest, Class, classSection):
                 for i in interp:
                     in_id = i.id
                     carrerID = ''
-                    
+
                     # if carrer != None:
                         # obj = Career.objects.filter(newCareer = carrer)
                         # for i in obj:
                         #     carrerID = i.id
-                    
-                    Reports.objects.filter(user=user,Class=Class, classSection = classSectionId,section=key1, typeOftest=typeOfTest).update(grade=grade, totalCount=totalMarks,interpretatio = in_id, carrer = carrerID)
+
+                    myReport = Reports.objects.filter(user=user,Class=Class, classSection = classSectionId,section=key1, typeOftest=typeOfTest)
+                    if myReport:
+                        myReport.update(grade=grade, totalCount= round(totalMarks, 2),interpretatio = in_id, carrer = carrerID)
+                    else:
+                        saveData = Reports.objects.create(user=user,Class=Class, classSection = classSectionId,section=key1, typeOftest=typeOfTest)
+                        Reports.objects.filter(id = saveData.id).update(grade=grade, totalCount=round(totalMarks, 2),interpretatio = in_id, carrer = carrerID)
+
                 continue
-             
+
 
 
 def getResultFunc(user, typeOfTest, Class, classSection):
@@ -838,6 +852,7 @@ def getResultFunc(user, typeOfTest, Class, classSection):
         serializerTwo = ReportsSerializer(flat_listTwo, many=True)
         myArray = [serializerOne.data, serializerTwo.data]
         return myArray
+
     if typeOfTest == oneOption:
         que = Reports.objects.filter(user=user, Class = Class, classSection = classSection, typeOftest = typeOfTest)
         serializer = ReportsSerializer(que, many=True)
@@ -863,7 +878,7 @@ def delReuslt(user, typeOfTest, Class, classSection):
 
     if Class == None or typeOfTest == None or classSection == None:
         return False
-        
+
     if typeOfTest == allOption:
         Reports.objects.filter(user=user, Class = Class, classSection = classSection, typeOftest = typeOfTest).delete()
         return True
@@ -993,7 +1008,7 @@ def paymentDecriment(user, typeOfTest, Class, classSection):
 
     if Class == None or typeOfTest == None or classSection == None:
         return False
-    
+
     classSec = AddClassSection.objects.filter(id = classSection)
     for i in classSec:
         classSectionMain = i.classSection
@@ -1016,7 +1031,7 @@ def checkPaymentRouter(request):
     typeOfTest = data["typeOfTest"]
     Class = data['Class']
     classSection = data['classSection']
-    
+
     if Class == None or typeOfTest == None or classSection == None:
         return Response(status.HTTP_402_PAYMENT_REQUIRED)
     classSec = AddClassSection.objects.filter(id = classSection)
@@ -1047,8 +1062,8 @@ def get_backup_func(request):
     # lock.notify()
     # lock.release()
     return Response(varSerializer)
-            
-    
+
+
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
@@ -1068,7 +1083,7 @@ def saveBackup_all(request):
     carrer = data['carrer']
     lastTime = data['lastTime']
 
-    sb = Thread(target=saveTestBackup, args=(user, typeOfTest, Class, classSection, 
+    sb = Thread(target=saveTestBackup, args=(user, typeOfTest, Class, classSection,
         section, question, object, lastTime, marks))
     sb.start()
     sb.join()
@@ -1085,8 +1100,8 @@ class ResultShowDeleteAll:
         self.lock = Condition()
         self.user = user
         self.typeOfTest = typeOfTest
-        self.Class = Class    
-        self.classSection = classSection    
+        self.Class = Class
+        self.classSection = classSection
 
     def save_section(self):
         self.lock.acquire()
@@ -1107,7 +1122,7 @@ class ResultShowDeleteAll:
     def get_result(self):
         self.lock.acquire()
         serializerData = getResultFunc(
-            self.user, self.typeOfTest, self.Class, self.classSection, 
+            self.user, self.typeOfTest, self.Class, self.classSection,
         )
         for i in serializerData:
             self.getResultData.append(i)
@@ -1116,21 +1131,21 @@ class ResultShowDeleteAll:
 
     def payment_decriment(self):
         paymentDecriment(
-            self.user, self.typeOfTest, self.Class, self.classSection, 
+            self.user, self.typeOfTest, self.Class, self.classSection,
         )
 
     def del_backup(self):
         self.lock.acquire()
         delBackup(
-            self.user, self.typeOfTest, self.Class, self.classSection, 
+            self.user, self.typeOfTest, self.Class, self.classSection,
         )
         self.lock.notify()
         self.lock.release()
-    
+
     def del_result(self):
         self.lock.acquire()
         delReuslt(
-            self.user, self.typeOfTest, self.Class, self.classSection, 
+            self.user, self.typeOfTest, self.Class, self.classSection,
         )
         self.lock.notify()
         self.lock.release()
@@ -1149,34 +1164,34 @@ def getResult(request):
     classSection = data['classSection']
 
     getResultDelEtc = ResultShowDeleteAll(
-        user, typeOfTest, Class, classSection, 
+        user, typeOfTest, Class, classSection,
         )
-    
+
     ss = Thread(target=getResultDelEtc.save_section)
     sr = Thread(target=getResultDelEtc.save_result)
     gr = Thread(target=getResultDelEtc.get_result)
     # pd = Thread(target=getResultDelEtc.payment_decriment)
-    db = Thread(target=getResultDelEtc.del_backup)
+    # db = Thread(target=getResultDelEtc.del_backup)
     dr = Thread(target=getResultDelEtc.del_result)
 
     ss.start()
     sr.start()
     gr.start()
     # pd.start()
-    db.start()
+    # db.start()
     dr.start()
 
     ss.join()
     sr.join()
     gr.join()
     # pd.join()
-    db.join()
+    # db.join()
     dr.join()
     # end = time.time()
     # print(f"Runtime of the program is {end - start}")
     return Response(getResultDelEtc.getResultData)
 
-    
+
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -1199,7 +1214,7 @@ def imageTypeLastDataUpdate(request):
         return Response(status.HTTP_304_NOT_MODIFIED)
 
 
-    
+
 
 
 

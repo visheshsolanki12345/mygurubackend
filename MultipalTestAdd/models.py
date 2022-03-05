@@ -7,7 +7,6 @@ from django.db.models import CharField, Model
 from django_mysql.models import ListF
 from django.contrib.auth.models import User
 # Create your models here.
-from ckeditor.fields import RichTextField
 
 
 class SelectAcademic(models.Model):
@@ -185,7 +184,7 @@ RIGHT_ANS_CHOICES =(
 
 class ImageOptionsTest(models.Model):
     section = models.ForeignKey(Section,on_delete=CASCADE,max_length=400, null=True, blank=True)
-    questionText = RichTextField(null=True, blank=True)
+    questionText = models.TextField(null=True, blank=True)
     question= models.ImageField(upload_to = 'Image-Test', null=True, blank=True, max_length=200)
     a = models.ImageField(upload_to = 'Image-Test', null=True, blank=True, max_length=200)
     aText = models.TextField(null=True, blank=True)
@@ -201,28 +200,7 @@ class ImageOptionsTest(models.Model):
     rightAns = models.CharField(null=True, blank=True, max_length=300)
     class Meta:
         verbose_name_plural = "Image Test"
-    def save(self, *args, **kwargs):
-        if self.choiceRightAns == 'A':
-            self.rightAns = f"/media/{self.a}" 
-        elif self.choiceRightAns == 'AText':
-            self.rightAns = self.aText
-        elif self.choiceRightAns == 'B':
-            self.rightAns = f"/media/{self.b}" 
-        elif self.choiceRightAns == 'BText':
-            self.rightAns = self.bText
-        elif self.choiceRightAns == 'C':
-            self.rightAns = f"/media/{self.c}" 
-        elif self.choiceRightAns == 'CText':
-            self.rightAns = self.cText
-        elif self.choiceRightAns == 'D':
-            self.rightAns = f"/media/{self.d}" 
-        elif self.choiceRightAns == 'DText':
-            self.rightAns = self.dText
-        elif self.choiceRightAns == 'E':
-            self.rightAns = f"/media/{self.e}" 
-        elif self.choiceRightAns == 'EText':
-            self.rightAns = self.eText
-        super(ImageOptionsTest, self).save(*args, **kwargs)
+    
     def __str__(self):
         return str(self.section)
     
@@ -309,7 +287,8 @@ class ResultTitle(models.Model):
     mainHeading = models.CharField(null=True, blank=True, max_length=400)
     title = models.CharField(null=True, blank=True, max_length=400)
     discription = models.TextField(null=True, blank=True)
-    point = models.TextField(null=True, blank=True)
+    point = models.CharField(null=True, blank=True, max_length=400)
+    pointDiscription = models.TextField(null=True, blank=True)
     the_json = jsonfield.JSONField()
     class Meta:
         verbose_name_plural = "Add Report Title"
@@ -320,13 +299,13 @@ class ResultTitle(models.Model):
             for i in op:
                 json = i.the_json
                 the_json = json
-            va = the_json["point"]
-            the_json["point"] = f"{va} <==> {self.point}"
-            ResultTitle.objects.filter(id = i.id).update(the_json = the_json)
-            return ResultTitle
+            the_json[self.point] = self.pointDiscription
+            ResultTitle.objects.filter(id = i.id).update(the_json = the_json, point = '')
+            return 
         else:
-            the_json["point"] = self.point
+            the_json[self.point] = self.pointDiscription
             self.the_json = the_json
+            self.point = ''
             super(ResultTitle, self).save(*args, **kwargs)
     def __str__(self):
         return str(f"{self.className} - {self.classSection}")

@@ -122,7 +122,7 @@ class ResultTitleSerializer(serializers.ModelSerializer):
     classSection = AddClassSectionSerializer(many=False, read_only=True)
     class Meta:
         model = ResultTitle
-        fields = ['typeOfTest', 'className', 'classSection', 'mainHeading', 'title', 'discription', 'point', 'the_json']
+        fields = ['typeOfTest', 'className', 'classSection', 'mainHeading', 'title', 'discription', 'point', 'pointDiscription', 'the_json']
 
 
 
