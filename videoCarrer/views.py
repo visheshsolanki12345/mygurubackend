@@ -256,3 +256,16 @@ def allVideoFunc(requst):
         "allCreate" : serializerCreate.data
         }
     return Response(context)
+
+
+@api_view(['GET', 'POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def parches_video(request):
+    context = {}
+    obj = VideoPaymentHistory.objects.filter(user = request.user, RESPCODE = "01")
+    for i in obj:
+        video_obj = VideoCarrer.objects.get(id = i.video.id)
+        context[video_obj.id] = f"{video_obj.title}<==>{video_obj.thumbnailImage}"
+    print(context)
+    return Response(context)

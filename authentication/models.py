@@ -4,9 +4,10 @@ from PIL import Image
 from django.conf import settings
 import os
 from django.dispatch import receiver
+from django.core.mail import send_mail  
 from django.urls import reverse
 from django_rest_passwordreset.signals import reset_password_token_created
-from django.core.mail import send_mail  
+
 # Create your models here.
 
 def user_directory_path_main(instance, filename):

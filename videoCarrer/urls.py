@@ -15,6 +15,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('youtube/', views.getYouTubVideo, name="youtube"),
     path('all-video/', views.allVideoFunc, name="all-video"),
+    path('parches-videos/', views.parches_video, name="all-video"),
 
 
     path('video-views/<str:pk>/', views.videoView, name="video-views"),

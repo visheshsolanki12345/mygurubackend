@@ -6,6 +6,7 @@ from django_mysql.models import ListCharField
 from django.db.models import CharField, Model
 from django_mysql.models import ListF
 from django.contrib.auth.models import User
+from tinymce.models import HTMLField
 # Create your models here.
 
 
@@ -42,6 +43,7 @@ class Title(models.Model):
     className = models.ForeignKey(NewClass,on_delete=CASCADE,max_length=400, null=True, blank=True)
     classSection = models.ForeignKey(AddClassSection,on_delete=CASCADE,max_length=400, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
+    generalInstructions = HTMLField(null=True, blank=True)
     duration = models.CharField(max_length=200,null=True, blank=True)
     price = models.FloatField(null=True, blank=True)
     class Meta:
@@ -184,7 +186,7 @@ RIGHT_ANS_CHOICES =(
 
 class ImageOptionsTest(models.Model):
     section = models.ForeignKey(Section,on_delete=CASCADE,max_length=400, null=True, blank=True)
-    questionText = models.TextField(null=True, blank=True)
+    questionText = HTMLField(null=True, blank=True)
     question= models.ImageField(upload_to = 'Image-Test', null=True, blank=True, max_length=200)
     a = models.ImageField(upload_to = 'Image-Test', null=True, blank=True, max_length=200)
     aText = models.TextField(null=True, blank=True)
@@ -207,7 +209,7 @@ class ImageOptionsTest(models.Model):
 
 class OneOptionsTest(models.Model):
     section = models.ForeignKey(Section,on_delete=CASCADE,max_length=400, null=True, blank=True)
-    question= models.TextField(max_length=400, null=True, blank=True)
+    question= HTMLField( null=True, blank=True)
     questionImage = models.ImageField(upload_to = 'MultiImage', null=True, blank=True, max_length=400)
     a = models.CharField(max_length=400, null=True, blank=True)
     b = models.CharField(max_length=400, null=True, blank=True)
@@ -236,7 +238,7 @@ class OneOptionsTest(models.Model):
 class OptionsTest(models.Model):
     career = models.ForeignKey(Career,on_delete=CASCADE,max_length=400, null=True, blank=True)
     section = models.ForeignKey(Section,on_delete=CASCADE,max_length=400, null=True, blank=True)
-    question= models.TextField(max_length=400, null=True, blank=True)
+    question= HTMLField(max_length=400, null=True, blank=True)
     a = models.CharField(max_length=400, null=True, blank=True)
     b = models.CharField(max_length=400, null=True, blank=True)
     c = models.CharField(max_length=400, null=True, blank=True)
@@ -249,7 +251,7 @@ class OptionsTest(models.Model):
 
 class FiveOptionsTest(models.Model):
     section = models.ForeignKey(Section,on_delete=CASCADE,max_length=400, null=True, blank=True)
-    question= models.TextField(max_length=400, null=True, blank=True)
+    question= HTMLField(max_length=400, null=True, blank=True)
     a = models.CharField(max_length=400, null=True, blank=True)
     b = models.CharField(max_length=400, null=True, blank=True)
     c = models.CharField(max_length=400, null=True, blank=True)
@@ -263,7 +265,7 @@ class FiveOptionsTest(models.Model):
 
 class ThreeOptionsTest(models.Model):
     section = models.ForeignKey(Section,on_delete=CASCADE,max_length=400, null=True, blank=True)
-    question= models.TextField(max_length=400, null=True, blank=True)
+    question= HTMLField(max_length=400, null=True, blank=True)
     a = models.CharField(max_length=400, null=True, blank=True)
     b = models.CharField(max_length=400, null=True, blank=True)
     c = models.CharField(max_length=400, null=True, blank=True)
@@ -286,27 +288,28 @@ class ResultTitle(models.Model):
     classSection = models.ForeignKey(AddClassSection,on_delete=CASCADE,max_length=400, null=True, blank=True)            
     mainHeading = models.CharField(null=True, blank=True, max_length=400)
     title = models.CharField(null=True, blank=True, max_length=400)
-    discription = models.TextField(null=True, blank=True)
+    discription = HTMLField(null=True, blank=True)
     point = models.CharField(null=True, blank=True, max_length=400)
-    pointDiscription = models.TextField(null=True, blank=True)
+    pointDiscription = HTMLField(null=True, blank=True)
     the_json = jsonfield.JSONField()
+
     class Meta:
         verbose_name_plural = "Add Report Title"
-    def save(self, *args, **kwargs):
-        the_json = {}
-        op = ResultTitle.objects.filter(className = self.className, classSection = self.classSection)
-        if op:
-            for i in op:
-                json = i.the_json
-                the_json = json
-            the_json[self.point] = self.pointDiscription
-            ResultTitle.objects.filter(id = i.id).update(the_json = the_json, point = '')
-            return 
-        else:
-            the_json[self.point] = self.pointDiscription
-            self.the_json = the_json
-            self.point = ''
-            super(ResultTitle, self).save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     the_json = {}
+    #     op = ResultTitle.objects.filter(className = self.className, classSection = self.classSection)
+    #     if op:
+    #         for i in op:
+    #             json = i.the_json
+    #             the_json = json
+    #         the_json[self.point] = self.pointDiscription
+    #         ResultTitle.objects.filter(id = i.id).update(the_json = the_json, point = '')
+    #         return 
+    #     else:
+    #         the_json[self.point] = self.pointDiscription
+    #         self.the_json = the_json
+    #         self.point = ''
+    #         super(ResultTitle, self).save(*args, **kwargs)
     def __str__(self):
         return str(f"{self.className} - {self.classSection}")
 

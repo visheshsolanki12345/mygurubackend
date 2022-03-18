@@ -226,31 +226,31 @@ def testFunc(typeTest, dis):
     try:
         discreption = AddTestSerializer(dis, many=True)
         if typeTest == oneOption:
-            que = OneOptionsTest.objects.all()
+            que = OneOptionsTest.objects.all().order_by('section')
             serializer = OneOptionsTestSerializer(que, many=True)
             context = {'data':serializer.data, 'discreption':discreption.data}
             return context
 
         elif typeTest == imageTest:
-            que = ImageOptionsTest.objects.all()
+            que = ImageOptionsTest.objects.all().order_by('section')
             serializer = ImageOptionsTestSerializer(que, many=True)
             context = {'data':serializer.data, 'discreption':discreption.data}
             return context
 
         elif typeTest == allOption:
-            que = OptionsTest.objects.all()
+            que = OptionsTest.objects.all().order_by('section')
             serializer = OptionsTestSerializer(que, many=True)
             context = {'data':serializer.data, 'discreption':discreption.data}
             return context
 
         elif typeTest == threeOption:
-            que = ThreeOptionsTest.objects.all()
+            que = ThreeOptionsTest.objects.all().order_by('section')
             serializer = ThreeOptionsTestSerializer(que, many=True)
             context = {'data':serializer.data, 'discreption':discreption.data}
             return context
 
         elif typeTest == fiveOption:
-            que = FiveOptionsTest.objects.all()
+            que = FiveOptionsTest.objects.all().order_by('section')
             serializer = FiveOptionsTestSerializer(que, many=True)
             context = {'data':serializer.data, 'discreption':discreption.data}
             return context
@@ -946,27 +946,28 @@ def pandingTest(request):
     allOption = TestBackupMultipalQuize.objects.filter(user=user)
     if allOption:
         for i in allOption:
-            context[i.className.id] = f"{i.className.newClass} - {i.classSection.classSection}"
+            context[i.className.id] = f"{i.className.newClass} - {i.classSection.classSection}<==>{i.classSection.id}"
+
 
     imageTest = TestBackupOneImageQuizeCorrect.objects.filter(user=user)
     if imageTest:
         for i in imageTest:
-            context[i.className.id] = f"{i.className.newClass} - {i.classSection.classSection}"
+            context[i.className.id] = f"{i.className.newClass} - {i.classSection.classSection}<==>{i.classSection.id}"
 
     oneOption = TestBackupOneQuizeCorrect.objects.filter(user=user)
     if oneOption:
         for i in oneOption:
-            context[i.className.id] = f"{i.className.newClass} - {i.classSection.classSection}"
+            context[i.className.id] = f"{i.className.newClass} - {i.classSection.classSection}<==>{i.classSection.id}"
 
     threeOption = TestBackupThreeQuize.objects.filter(user=user)
     if threeOption:
         for i in threeOption:
-            context[i.className.id] = f"{i.className.newClass} - {i.classSection.classSection}"
+            context[i.className.id] = f"{i.className.newClass} - {i.classSection.classSection}<==>{i.classSection.id}"
 
     fiveOption = TestBackupFiveQuize.objects.filter(user=user)
     if fiveOption:
         for i in fiveOption:
-            context[i.className.id] = f"{i.className.newClass} - {i.classSection.classSection}"
+            context[i.className.id] = f"{i.className.newClass} - {i.classSection.classSection}<==>{i.classSection.id}"
 
     return Response(context)
 
@@ -997,8 +998,8 @@ def buyTest(request):
                 for i in classSec:
                     classSectionId = i.id
                 addTestobj = AddTest.objects.filter(typeOfTest = testID, className = classID, classSection = classSectionId)
-                for m in addTestobj:
-                    context[i.className.id] = f"{i.className.newClass} - {i.classSection.classSection}"
+                for i in addTestobj:
+                    context[i.className.id] = f"{i.className.newClass} - {i.classSection.classSection}<==>{i.classSection.id}"
         return Response(context)
     return Response("No buy test available")
 
@@ -1171,31 +1172,28 @@ def getResult(request):
     sr = Thread(target=getResultDelEtc.save_result)
     gr = Thread(target=getResultDelEtc.get_result)
     # pd = Thread(target=getResultDelEtc.payment_decriment)
-    # db = Thread(target=getResultDelEtc.del_backup)
+    db = Thread(target=getResultDelEtc.del_backup)
     dr = Thread(target=getResultDelEtc.del_result)
 
     ss.start()
     sr.start()
     gr.start()
     # pd.start()
-    # db.start()
+    db.start()
     dr.start()
 
     ss.join()
     sr.join()
     gr.join()
     # pd.join()
-    # db.join()
+    db.join()
     dr.join()
     # end = time.time()
     # print(f"Runtime of the program is {end - start}")
     return Response(getResultDelEtc.getResultData)
 
 
-@api_view(['POST'])
-@authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated])
-def imageTypeLastDataUpdate(request):
+def saveSectionTime(request):
     data = request.data
     user = request.user
     context = {}
@@ -1209,12 +1207,20 @@ def imageTypeLastDataUpdate(request):
         saveObj = TestBackupOneImageQuizeCorrect.objects.get(id = list(context)[-1])
         saveObj.lastTime = lastTime
         saveObj.save()
-        return Response(status.HTTP_201_CREATED)
+        return 
     except:
-        return Response(status.HTTP_304_NOT_MODIFIED)
+        return 
 
 
 
 
 
 
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def imageTypeLastDataUpdate(request):
+    t = Thread(target=saveSectionTime, args=(request,))
+    t.start()
+    t.join()
+    return Response(status.HTTP_201_CREATED)

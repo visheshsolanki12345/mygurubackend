@@ -146,7 +146,7 @@ class SelectNumberModelAdmin(admin.ModelAdmin):
 
 @admin.register(Title)
 class TitleModelAdmin(admin.ModelAdmin):
-    list_display = ['className', 'classSection', 'description', 'duration', 'price']
+    list_display = ['className', 'classSection',  'duration', 'price']
     search_fields = [
         'className__newClass', 'classSection__classSection', 
         ]
@@ -157,7 +157,8 @@ class TitleModelAdmin(admin.ModelAdmin):
 
 @admin.register(ResultTitle)
 class ResultTitleModelAdmin(admin.ModelAdmin):
-    list_display = ['typeOfTest', 'className', 'classSection', 'mainHeading', 'title', 'discription', 'point', 'pointDiscription', 'the_json']
+    # list_display = ['typeOfTest', 'className', 'classSection', 'mainHeading', 'title', 'discription', 'point', 'pointDiscription', 'the_json']
+    list_display = ['typeOfTest', 'className', 'classSection', 'mainHeading', 'title']
     search_fields = [
         'className__newClass', 'classSection__classSection', 
         'typeOfTest__selectTest'
@@ -184,9 +185,9 @@ class AddTestModelAdmin(admin.ModelAdmin):
 class ReportsModelAdmin(admin.ModelAdmin):
     list_display = ['id','user', 'Class', 'classSection', 'sectionInterest', 'carrer', 'section', 'interpretatio', 'grade', 'totalCount', 'typeOftest', 'totalNoQu']
 
-# @admin.register(PaymentHistory)
-# class PaymentHistoryModelAdmin(admin.ModelAdmin):
-#     list_display = ['user', 'typeOfTest', 'classSection', 'Class', 'ORDER_ID', 'TXN_AMOUNT', 'email', 'status', 'gateway', 'bankname', 'TXNID', 'TXNDATE', 'paymentCount', 'CURRENCY', 'PAYMENTMODE', 'MID', 'RESPCODE']
+@admin.register(PaymentHistory)
+class PaymentHistoryModelAdmin(admin.ModelAdmin):
+    list_display = ['user', 'typeOfTest', 'classSection', 'Class', 'ORDER_ID', 'TXN_AMOUNT', 'email', 'status', 'gateway', 'bankname', 'TXNID', 'TXNDATE', 'paymentCount', 'CURRENCY', 'PAYMENTMODE', 'MID', 'RESPCODE']
 
 # @admin.register(TestBackupOneQuizeCorrect)
 # class TestBackupOneQuizeCorrectModelAdmin(admin.ModelAdmin):

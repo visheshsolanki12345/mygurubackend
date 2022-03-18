@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'MultipalTestAdd',
     'CareerManagementSystem',
     'CommanFunctions',   
+    'tinymce'
 ]
 
 
@@ -190,8 +191,8 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'visheshsolanki12345@gmail.com'
 EMAIL_HOST_PASSWORD = 'wvvnshtnrqhmwiwt'
 
-STATIC_URL = '/static/'
-MEDIA_URL = '/media/'
+# STATIC_URL = '/static/'
+# MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 LOGIN_REDIRECT_URL = '/profile/'
 

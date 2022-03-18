@@ -13,7 +13,7 @@ urlpatterns = [
     path('api/video/', include("videoCarrer.urls")),
     path('api/', include("MultipalTestAdd.urls")),
     path('api/comman-function/', include("CommanFunctions.urls")),
-    url(r'^ckeditor/', include('ckeditor_uploader.urls')),
+    url(r'^tinymce/', include('tinymce.urls')),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

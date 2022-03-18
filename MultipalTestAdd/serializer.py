@@ -48,7 +48,7 @@ class TitleSerializer(serializers.ModelSerializer):
     classSection = AddClassSectionSerializer(many=False, read_only=True)
     class Meta:
         model = Title
-        fields = ['id', 'className', 'classSection', 'description', 'duration', 'price']
+        fields = ['id', 'className', 'classSection', 'generalInstructions', 'description', 'duration', 'price']
 
 class ShowGradeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -81,7 +81,7 @@ class ImageOptionsTestSerializer(serializers.ModelSerializer):
     section = SectionSerializer(many=False, read_only=True)
     class Meta:
         model = ImageOptionsTest
-        fields = ['id', 'section', 'question', 'questionText', 'a','aText', 'b','bText', 'c', 'cText', 'd', 'dText', 'rightAns']
+        fields = ['id', 'section', 'question', 'questionText', 'a','aText', 'b','bText', 'c', 'cText', 'd', 'dText', 'e', 'eText', 'rightAns']
 
 class OneOptionsTestSerializer(serializers.ModelSerializer):
     section = SectionSerializer(many=False, read_only=True)

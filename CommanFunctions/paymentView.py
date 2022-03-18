@@ -82,8 +82,8 @@ class PaymentClass:
             'INDUSTRY_TYPE_ID': 'Retail',
             'WEBSITE': 'WEBSTAGING',
             'CHANNEL_ID': 'WEB',
-            'CALLBACK_URL':'http://127.0.0.1:8000/api/comman-function/handlepayment/',
-            # 'CALLBACK_URL':'https://visheshsolanki.pythonanywhere.com/api/handlepayment/',
+            # 'CALLBACK_URL':'http://127.0.0.1:8000/api/comman-function/handlepayment/',
+            'CALLBACK_URL':'https://visheshsolanki.pythonanywhere.com/api/comman-function/handlepayment/',
         }
 
         param_dict['CHECKSUMHASH'] = Checksum.generate_checksum(param_dict, settings.PAYTEM_MERCHANT_KEY)
@@ -124,7 +124,8 @@ class PayHendel:
                         MID = response_dict['MID'],
                     )
                     obj = ArticlePaymentHistory.objects.get(ORDER_ID = response_dict['ORDERID'])
-                    self.RedirectUrl = f"http://localhost:3000/article-page/{obj.article.id}"
+                    # self.RedirectUrl = f"http://localhost:3000/article-page/{obj.article.id}"
+                    self.RedirectUrl = f"https://my-guru-test.herokuapp.com/article-page/{obj.article.id}"
 
                 elif findCode == 2:
                     VideoPaymentHistory.objects.filter(ORDER_ID = response_dict['ORDERID']).update(
@@ -139,7 +140,8 @@ class PayHendel:
                         MID = response_dict['MID'],
                     )
                     obj = VideoPaymentHistory.objects.get(ORDER_ID = response_dict['ORDERID'])
-                    self.RedirectUrl = f"http://localhost:3000/video-page/{obj.video.id}"
+                    # self.RedirectUrl = f"http://localhost:3000/video-page/{obj.video.id}"
+                    self.RedirectUrl = f"https://my-guru-test.herokuapp.com/video-page/{obj.video.id}"
 
                 elif findCode == 3:
                     if response_dict['RESPCODE'] == '01':
@@ -161,7 +163,8 @@ class PayHendel:
                             MID = response_dict['MID'],
                         )
                         obj = BookSlotPaymentHistory.objects.get(ORDER_ID = response_dict['ORDERID'])
-                        self.RedirectUrl = f"http://localhost:3000/counsellor-page/{obj.slotBook.counsellorSlot.counsellor.id}"
+                        # self.RedirectUrl = f"http://localhost:3000/counsellor-page/{obj.slotBook.counsellorSlot.counsellor.id}"
+                        self.RedirectUrl = f"https://my-guru-test.herokuapp.com/counsellor-page/{obj.slotBook.counsellorSlot.counsellor.id}"
                     else:
                         return
                 if response_dict['RESPCODE'] == '01':
@@ -189,7 +192,8 @@ def HandlePayRequest(request):
     pht.join()
     if classObj.signal == True:
         return redirect(classObj.RedirectUrl)
-    return redirect("http://localhost:3000/error")
+    # return redirect("http://localhost:3000/error")
+    return redirect("https://my-guru-test.herokuapp.com/error")
 
             
 ##============================== End... ================================##
