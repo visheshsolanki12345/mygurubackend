@@ -165,8 +165,8 @@ def PaytemFunc(orderId, amount, userEmail, user, typeOfTest, Class, classSection
         'INDUSTRY_TYPE_ID': 'Retail',
         'WEBSITE': 'WEBSTAGING',
         'CHANNEL_ID': 'WEB',
-        'CALLBACK_URL':'http://127.0.0.1:8000/api/handlepayment/',
-        # 'CALLBACK_URL':'https://visheshsolanki.pythonanywhere.com/api/handlepayment/',
+        # 'CALLBACK_URL':'http://127.0.0.1:8000/api/handlepayment/',
+        'CALLBACK_URL':'https://visheshsolanki.pythonanywhere.com/api/handlepayment/',
     }
     PaymentHistory.objects.create(
         user = user,
@@ -209,8 +209,8 @@ def HandlePaytemRequest(request):
             )
             if response_dict['RESPCODE'] == '01':
                 print('order successful')
-                # url = "https://my-guru-test.herokuapp.com/paymentassessment"
-                url = "http://localhost:3000/paymentassessment"
+                url = "https://my-guru-test.herokuapp.com/paymentassessment"
+                # url = "http://localhost:3000/paymentassessment"
                 return redirect(url)
             else:
                 print('order was not successful because' + response_dict['RESPMSG'])
@@ -557,7 +557,7 @@ def findSectionResult(user, typeOfTest, Class, classSection):
         for i in sectionAll:
             arraySet.add(i.section)
 
-
+    countLoop = 0
     for allSecId in arraySet:
         secID = Section.objects.get(section = allSecId)
         countNO = []
@@ -650,7 +650,7 @@ def findSectionResult(user, typeOfTest, Class, classSection):
             noSum = max(countNO) * toQuCount
         totalMarks = 0
         que = ShowGrade.objects.filter(className = classID, classSection = classSectionId, section = secID)
-        
+        countLoop += 1
         if typeOfTest != imageTest:
             for i in que:
                 context = i.the_json
@@ -674,14 +674,16 @@ def findSectionResult(user, typeOfTest, Class, classSection):
                     Reports.objects.create(
                         user = user, section = allSecId.section, sectionInterest = allSecId.sectionInterest, 
                         totalCount = round(totalMarks, 2), totalNoQu = noSum, typeOftest = typeOfTest, 
-                        classSection = classSection, Class = Class, grade = grade, interpretatio = interp
+                        classSection = classSection, Class = Class, grade = grade, interpretatio = interp,
+                        index = countLoop
                     )
         else:
             interp = Interpretation.objects.get(className = classID, classSection = classSectionId, section = secID)
             Reports.objects.create(
                 user = user, section = allSecId.section, sectionInterest = allSecId.sectionInterest, 
                 totalCount = round(totalMarks, 2), totalNoQu = noSum, typeOftest = typeOfTest, 
-                classSection = classSection, Class = Class, grade = 'Below Average', interpretatio = interp
+                classSection = classSection, Class = Class, grade = 'Below Average', interpretatio = interp, 
+                index = countLoop
             )        
 
                     # if carrer != None:

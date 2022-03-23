@@ -183,7 +183,7 @@ class AddTestModelAdmin(admin.ModelAdmin):
 
 @admin.register(Reports)
 class ReportsModelAdmin(admin.ModelAdmin):
-    list_display = ['id','user', 'Class', 'classSection', 'sectionInterest', 'carrer', 'section', 'interpretatio', 'grade', 'totalCount', 'typeOftest', 'totalNoQu']
+    list_display = ['id','user', 'Class', 'classSection', 'sectionInterest', 'carrer', 'section', 'interpretatio', 'grade', 'totalCount', 'typeOftest', 'totalNoQu', 'index']
 
 @admin.register(PaymentHistory)
 class PaymentHistoryModelAdmin(admin.ModelAdmin):

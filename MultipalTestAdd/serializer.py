@@ -144,7 +144,7 @@ class ReportsSerializer(serializers.ModelSerializer):
     carrer = CareerSerializer(many=False, read_only=True)
     class Meta:
         model = Reports
-        fields = ['id','user', 'Class', 'classSection', 'carrer', 'section', 'interpretatio', 'grade', 'totalCount', 'typeOftest', 'totalNoQu']
+        fields = ['id','user', 'Class', 'classSection', 'carrer', 'section', 'interpretatio', 'grade', 'totalCount', 'typeOftest', 'totalNoQu', 'index']
 
 
 class TestBackupOneQuizeCorrectSerializer(serializers.ModelSerializer):

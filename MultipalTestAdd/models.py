@@ -343,7 +343,9 @@ class Reports(models.Model):
     # industry_Grade = models.CharField(null=True, blank=True, max_length=200)
     typeOftest = models.CharField(null=True, blank=True, max_length=200)
     totalNoQu = models.FloatField(null=True, blank=True, max_length=200)
+    index = models.IntegerField(null=True, blank=True)
     carrer = models.ForeignKey(Career,on_delete=CASCADE, max_length=500, null=True, blank=True)
+
     def __str__(self):
         return str(f"{self.user} - {self.Class} - {self.classSection}")
 
